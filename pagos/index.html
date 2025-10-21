@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Pagos Semanales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #667eea;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.active {
+            background: #764ba2;
+        }
+
+        .payments-container.list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .payments-container.grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .payment-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .payment-item.paid {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-color: #11998e;
+            color: white;
+        }
+
+        .payment-item.paid::before {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 2em;
+            font-weight: bold;
+            opacity: 0.3;
+        }
+
+        .payment-date {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .payment-amount {
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .payment-item.paid .payment-amount {
+            color: white;
+        }
+
+        .payment-number {
+            font-size: 0.9em;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        @keyframes checkmark {
+            0% {
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(180deg);
+            }
+            100% {
+                transform: scale(1) rotate(360deg);
+            }
+        }
+
+        .payment-item.just-paid {
+            animation: checkmark 0.5s ease;
+        }
+
+        .completion-message {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            display: none;
+        }
+
+        .completion-message.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .payments-container.grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Registro de Pagos Semanales</h1>
+
+        <div class="completion-message" id="completionMessage">
+            🎉 ¡Felicidades! Has completado tu meta de $205,000 MXN 🎉
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">Pagos Realizados</div>
+                    <div class="stat-value" id="paidCount">0 / 0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Pagado</div>
+                    <div class="stat-value" id="paidAmount">$0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Falta por Pagar</div>
+                    <div class="stat-value" id="remainingAmount">$205,000</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="view-toggle">
+                <button class="btn active" id="gridViewBtn" onclick="setView('grid')">🔲 Cuadrícula</button>
+                <button class="btn" id="listViewBtn" onclick="setView('list')">📋 Lista</button>
+            </div>
+        </div>
+
+        <div class="payments-container grid" id="paymentsContainer"></div>
+    </div>
+
+    <script>
+        const PAYMENT_AMOUNT = 2150;
+        const GOAL_AMOUNT = 205000;
+        const TOTAL_PAYMENTS = Math.ceil(GOAL_AMOUNT / PAYMENT_AMOUNT);
+
+        let payments = {};
+        let currentView = 'grid';
+
+        function initializePayments() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+            
+            const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+            let firstMonday = new Date(firstDayOfMonth);
+            
+            while (firstMonday.getDay() !== 1) {
+                firstMonday.setDate(firstMonday.getDate() + 1);
+            }
+
+            const paymentDates = [];
+            let currentDate = new Date(firstMonday);
+
+            for (let i = 0; i < TOTAL_PAYMENTS; i++) {
+                paymentDates.push(new Date(currentDate));
+                currentDate.setDate(currentDate.getDate() + 7);
+            }
+
+            return paymentDates;
+        }
+
+        function loadFromStorage() {
+            const stored = window.localStorage.getItem('paymentProgress');
+            if (stored) {
+                payments = JSON.parse(stored);
+            }
+            
+            const storedView = window.localStorage.getItem('viewPreference');
+            if (storedView) {
+                currentView = storedView;
+            }
+        }
+
+        function saveToStorage() {
+            window.localStorage.setItem('paymentProgress', JSON.stringify(payments));
+            window.localStorage.setItem('viewPreference', currentView);
+        }
+
+        function formatDate(date) {
+            const options = { day: '2-digit', month: 'long', year: 'numeric' };
+            return date.toLocaleDateString('es-MX', options);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN'
+            }).format(amount);
+        }
+
+        function togglePayment(dateStr) {
+            const totalPaid = Object.values(payments).filter(p => p).length * PAYMENT_AMOUNT;
+            
+            if (!payments[dateStr] && totalPaid >= GOAL_AMOUNT) {
+                return;
+            }
+
+            payments[dateStr] = !payments[dateStr];
+            saveToStorage();
+            render();
+        }
+
+        function updateProgress() {
+            const paidCount = Object.values(payments).filter(p => p).length;
+            const paidAmount = paidCount * PAYMENT_AMOUNT;
+            const remainingAmount = GOAL_AMOUNT - paidAmount;
+            const percentage = Math.min((paidAmount / GOAL_AMOUNT) * 100, 100);
+
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressBar').textContent = percentage.toFixed(1) + '%';
+            document.getElementById('paidCount').textContent = `${paidCount} / ${TOTAL_PAYMENTS}`;
+            document.getElementById('paidAmount').textContent = formatCurrency(paidAmount);
+            document.getElementById('remainingAmount').textContent = formatCurrency(Math.max(remainingAmount, 0));
+
+            const completionMsg = document.getElementById('completionMessage');
+            if (paidAmount >= GOAL_AMOUNT) {
+                completionMsg.classList.add('show');
+            } else {
+                completionMsg.classList.remove('show');
+            }
+        }
+
+        function setView(view) {
+            currentView = view;
+            saveToStorage();
+            
+            document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
+            document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
+            
+            const container = document.getElementById('paymentsContainer');
+            container.className = 'payments-container ' + view;
+        }
+
+        function render() {
+            const paymentDates = initializePayments();
+            const container = document.getElementById('paymentsContainer');
+            container.innerHTML = '';
+
+            paymentDates.forEach((date, index) => {
+                const dateStr = date.toISOString().split('T')[0];
+                const isPaid = payments[dateStr] || false;
+
+                const item = document.createElement('div');
+                item.className = 'payment-item' + (isPaid ? ' paid' : '');
+                item.onclick = function() {
+                    togglePayment(dateStr);
+                    if (!isPaid) {
+                        item.classList.add('just-paid');
+                        setTimeout(() => item.classList.remove('just-paid'), 500);
+                    }
+                };
+
+                item.innerHTML = `
+                    <div class="payment-number">Pago #${index + 1}</div>
+                    <div class="payment-date">${formatDate(date)}</div>
+                    <div class="payment-amount">${formatCurrency(PAYMENT_AMOUNT)}</div>
+                `;
+
+                container.appendChild(item);
+            });
+
+            updateProgress();
+            setView(currentView);
+        }
+
+        loadFromStorage();
+        render();
+    </script>
+</body>
+</html>
