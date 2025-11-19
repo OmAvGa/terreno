@@ -106,7 +106,34 @@
         }
 
         .controls {
+            display: flex;
+            justify-content: center;
             margin-bottom: 20px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #667eea;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.active {
+            background: #764ba2;
         }
 
         .payments-container {
@@ -236,7 +263,7 @@
         <h1>Registro de Pagos Semanales</h1>
 
         <div class="completion-message" id="completionMessage">
-            ¡Felicidades! Has completado tu meta de $205,000 MXN
+            Ya tenemos terreno mi amor ❤️
         </div>
 
         <div class="progress-section">
@@ -260,30 +287,62 @@
         </div>
 
         <div class="controls">
-            <!-- Botones de vista removidos -->
+            <div class="view-toggle">
+                <button class="btn active" id="weeklyBtn" onclick="setPaymentMode('weekly')">Semanal</button>
+                <button class="btn" id="monthlyBtn" onclick="setPaymentMode('monthly')">Mensual</button>
+            </div>
         </div>
 
         <div class="payments-container" id="paymentsContainer"></div>
     </div>
 
     <script>
-        const PAYMENT_AMOUNT = 2000; // Pago semanal ajustado
+        const WEEKLY_PAYMENT = 2000;
+        const MONTHLY_PAYMENT = 8550; // Pago mensual redondeado
         const GOAL_AMOUNT = 205000;
-        const TOTAL_PAYMENTS = 104;
+        const TOTAL_WEEKS = 104;
+        const TOTAL_MONTHS = 24;
 
         let payments = {};
-        let currentView = 'grid';
+        let paymentMode = 'weekly'; // 'weekly' o 'monthly'
 
         function initializePayments() {
-            // Fecha de inicio: primer lunes de octubre 2025
-            const startDate = new Date(2025, 9, 6); // 6 de octubre 2025 (primer lunes)
-            
             const paymentDates = [];
-            let currentDate = new Date(startDate);
 
-            for (let i = 0; i < TOTAL_PAYMENTS; i++) {
-                paymentDates.push(new Date(currentDate));
-                currentDate.setDate(currentDate.getDate() + 7);
+            if (paymentMode === 'weekly') {
+                // Generar 104 pagos semanales - primer lunes de octubre 2025
+                const startDate = new Date(2025, 9, 6); // 6 de octubre 2025 (primer lunes)
+                let currentDate = new Date(startDate);
+                
+                for (let i = 0; i < TOTAL_WEEKS; i++) {
+                    paymentDates.push(new Date(currentDate));
+                    currentDate.setDate(currentDate.getDate() + 7);
+                }
+            } else {
+                // Generar 24 pagos mensuales - último lunes de cada mes
+                let year = 2025;
+                let month = 9; // Octubre (0-indexed)
+                
+                for (let i = 0; i < TOTAL_MONTHS; i++) {
+                    // Obtener el último día del mes
+                    const lastDay = new Date(year, month + 1, 0);
+                    const lastDayOfMonth = lastDay.getDate();
+                    
+                    // Buscar el último lunes del mes
+                    let lastMonday = new Date(year, month, lastDayOfMonth);
+                    while (lastMonday.getDay() !== 1) {
+                        lastMonday.setDate(lastMonday.getDate() - 1);
+                    }
+                    
+                    paymentDates.push(new Date(lastMonday));
+                    
+                    // Avanzar al siguiente mes
+                    month++;
+                    if (month > 11) {
+                        month = 0;
+                        year++;
+                    }
+                }
             }
 
             return paymentDates;
@@ -295,15 +354,15 @@
                 payments = JSON.parse(stored);
             }
             
-            const storedView = window.localStorage.getItem('viewPreference');
-            if (storedView) {
-                currentView = storedView;
+            const storedMode = window.localStorage.getItem('paymentMode');
+            if (storedMode) {
+                paymentMode = storedMode;
             }
         }
 
         function saveToStorage() {
             window.localStorage.setItem('paymentProgress', JSON.stringify(payments));
-            window.localStorage.setItem('viewPreference', currentView);
+            window.localStorage.setItem('paymentMode', paymentMode);
         }
 
         function formatDate(date) {
@@ -319,7 +378,8 @@
         }
 
         function togglePayment(dateStr) {
-            const totalPaid = Object.values(payments).filter(p => p).length * PAYMENT_AMOUNT;
+            const paymentAmount = paymentMode === 'weekly' ? WEEKLY_PAYMENT : MONTHLY_PAYMENT;
+            const totalPaid = Object.values(payments).filter(p => p).length * paymentAmount;
             
             if (!payments[dateStr] && totalPaid >= GOAL_AMOUNT) {
                 return;
@@ -331,14 +391,16 @@
         }
 
         function updateProgress() {
+            const paymentAmount = paymentMode === 'weekly' ? WEEKLY_PAYMENT : MONTHLY_PAYMENT;
+            const totalPayments = paymentMode === 'weekly' ? TOTAL_WEEKS : TOTAL_MONTHS;
             const paidCount = Object.values(payments).filter(p => p).length;
-            const paidAmount = paidCount * PAYMENT_AMOUNT;
+            const paidAmount = paidCount * paymentAmount;
             const remainingAmount = GOAL_AMOUNT - paidAmount;
             const percentage = Math.min((paidAmount / GOAL_AMOUNT) * 100, 100);
 
             document.getElementById('progressBar').style.width = percentage + '%';
             document.getElementById('progressBar').textContent = percentage.toFixed(1) + '%';
-            document.getElementById('paidCount').textContent = `${paidCount} / ${TOTAL_PAYMENTS}`;
+            document.getElementById('paidCount').textContent = `${paidCount} / ${totalPayments}`;
             document.getElementById('paidAmount').textContent = formatCurrency(paidAmount);
             document.getElementById('remainingAmount').textContent = formatCurrency(Math.max(remainingAmount, 0));
 
@@ -350,13 +412,18 @@
             }
         }
 
-        function setView(view) {
-            // Función simplificada - siempre vista de cuadrícula
-            const container = document.getElementById('paymentsContainer');
-            container.className = 'payments-container';
+        function setPaymentMode(mode) {
+            paymentMode = mode;
+            saveToStorage();
+            
+            document.getElementById('weeklyBtn').classList.toggle('active', mode === 'weekly');
+            document.getElementById('monthlyBtn').classList.toggle('active', mode === 'monthly');
+            
+            render();
         }
 
         function render() {
+            const paymentAmount = paymentMode === 'weekly' ? WEEKLY_PAYMENT : MONTHLY_PAYMENT;
             const paymentDates = initializePayments();
             const container = document.getElementById('paymentsContainer');
             container.innerHTML = '';
@@ -378,14 +445,13 @@
                 item.innerHTML = `
                     <div class="payment-number">Pago #${index + 1}</div>
                     <div class="payment-date">${formatDate(date)}</div>
-                    <div class="payment-amount">${formatCurrency(PAYMENT_AMOUNT)}</div>
+                    <div class="payment-amount">${formatCurrency(paymentAmount)}</div>
                 `;
 
                 container.appendChild(item);
             });
 
             updateProgress();
-            setView(currentView);
         }
 
         loadFromStorage();
