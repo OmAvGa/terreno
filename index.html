@@ -106,46 +106,10 @@
         }
 
         .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
         }
 
-        .view-toggle {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s ease;
-            background: #667eea;
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn.active {
-            background: #764ba2;
-        }
-
-        .payments-container.list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .payments-container.grid {
+        .payments-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 15px;
@@ -257,7 +221,7 @@
                 font-size: 1.5em;
             }
 
-            .payments-container.grid {
+            .payments-container {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
 
@@ -269,10 +233,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>💰 Registro de Pagos Semanales</h1>
+        <h1>Registro de Pagos Semanales</h1>
 
         <div class="completion-message" id="completionMessage">
-            🎉 ¡Felicidades! Has completado tu meta de $205,000 MXN 🎉
+            ¡Felicidades! Has completado tu meta de $205,000 MXN
         </div>
 
         <div class="progress-section">
@@ -296,37 +260,26 @@
         </div>
 
         <div class="controls">
-            <div class="view-toggle">
-                <button class="btn active" id="gridViewBtn" onclick="setView('grid')">🔲 Cuadrícula</button>
-                <button class="btn" id="listViewBtn" onclick="setView('list')">📋 Lista</button>
-            </div>
+            <!-- Botones de vista removidos -->
         </div>
 
-        <div class="payments-container grid" id="paymentsContainer"></div>
+        <div class="payments-container" id="paymentsContainer"></div>
     </div>
 
     <script>
-        const PAYMENT_AMOUNT = 2150;
+        const PAYMENT_AMOUNT = 2000; // Pago semanal ajustado
         const GOAL_AMOUNT = 205000;
-        const TOTAL_PAYMENTS = Math.ceil(GOAL_AMOUNT / PAYMENT_AMOUNT);
+        const TOTAL_PAYMENTS = 104;
 
         let payments = {};
         let currentView = 'grid';
 
         function initializePayments() {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth();
+            // Fecha de inicio: primer lunes de octubre 2025
+            const startDate = new Date(2025, 9, 6); // 6 de octubre 2025 (primer lunes)
             
-            const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-            let firstMonday = new Date(firstDayOfMonth);
-            
-            while (firstMonday.getDay() !== 1) {
-                firstMonday.setDate(firstMonday.getDate() + 1);
-            }
-
             const paymentDates = [];
-            let currentDate = new Date(firstMonday);
+            let currentDate = new Date(startDate);
 
             for (let i = 0; i < TOTAL_PAYMENTS; i++) {
                 paymentDates.push(new Date(currentDate));
@@ -398,14 +351,9 @@
         }
 
         function setView(view) {
-            currentView = view;
-            saveToStorage();
-            
-            document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
-            document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
-            
+            // Función simplificada - siempre vista de cuadrícula
             const container = document.getElementById('paymentsContainer');
-            container.className = 'payments-container ' + view;
+            container.className = 'payments-container';
         }
 
         function render() {
