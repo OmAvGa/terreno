@@ -215,7 +215,10 @@
       outline:none; transition:border-color 0.2s;
     }
     .field-input:focus { border-color:var(--primary); }
-    .field-row    { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .field-row    { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media (min-width:480px) {
+      .field-row  { grid-template-columns:1fr 1fr; }
+    }
 
     /* ── FOTO UPLOAD ── */
     .foto-zone {
@@ -327,7 +330,7 @@
       .weekly-amount { font-size:2rem; }
       .weekly-grid { gap:7px; }
       .wg-item { padding:9px 10px; }
-      .field-row { grid-template-columns:1fr; }
+      .field-row { grid-template-columns:1fr !important; }
       .foto-btns { grid-template-columns:1fr 1fr; }
       .abono-thumb { width:46px; height:46px; }
       .abono-no-photo { width:46px; height:46px; }
@@ -574,9 +577,13 @@
     document.getElementById('inNote').value   = '';
     clearFoto();
     document.getElementById('overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
     setTimeout(() => document.getElementById('inAmount').focus(), 360);
   }
-  function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
   function outsideClick(e) { if (e.target.id === 'overlay') closeModal(); }
 
   function onFotoChange(e) {
