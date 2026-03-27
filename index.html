@@ -88,10 +88,12 @@
       box-shadow:var(--shadow-lg);
       padding:40px 28px 24px; margin-bottom:16px;
     }
-    .prog-top { text-align:center; margin-bottom:20px; }
+    .prog-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+    .prog-left { flex:1; }
     .prog-pct { font-size:4.5rem; font-weight:800; color:var(--primary-dark); line-height:1; letter-spacing:-0.04em; }
-    .prog-sub { font-size:0.85rem; color:var(--muted); margin-top:8px; }
-    .prog-right { display:none; }
+    .prog-sub { font-size:0.85rem; color:var(--muted); margin-top:6px; }
+    .prog-right { text-align:right; flex-shrink:0; padding-left:12px; }
+    .prog-paid-val { font-size:1.6rem; font-weight:800; color:var(--primary-dark); letter-spacing:-0.02em; line-height:1; }
     .prog-track { background:var(--border); height:14px; border-radius:7px; overflow:hidden; margin-bottom:20px; }
     .prog-fill  {
       height:100%;
@@ -313,8 +315,9 @@
       .header-sub { font-size:0.82rem; }
       .header-value-amount { font-size:1.55rem; }
       .main { padding:0 12px 40px; }
-      .progress-hero { padding:24px 16px 18px; }
+      .progress-hero { padding:40px 16px 18px; }
       .prog-pct  { font-size:3.5rem; }
+      .prog-paid-val { font-size:1.35rem; }
       .prog-top  { margin-bottom:16px; }
       .stats-row { gap:7px; }
       .stat-box  { padding:12px 8px; }
@@ -355,8 +358,14 @@
   <!-- PROGRESO GENERAL -->
   <div class="progress-hero">
     <div class="prog-top">
-      <div class="prog-pct" id="pct">0%</div>
-      <div class="prog-sub"><span id="paidVal">$0</span> de $215,000 pagados</div>
+      <div class="prog-left">
+        <div class="prog-pct" id="pct">0%</div>
+        <div class="prog-sub">del lote pagado</div>
+      </div>
+      <div class="prog-right">
+        <div class="prog-paid-val" id="paidVal">$0</div>
+        <div class="prog-sub">de $215,000</div>
+      </div>
     </div>
     <div class="prog-track">
       <div class="prog-fill" id="progFill" style="width:0%"></div>
