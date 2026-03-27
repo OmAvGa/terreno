@@ -88,13 +88,11 @@
       box-shadow:var(--shadow-lg);
       padding:28px 28px 24px; margin-bottom:16px;
     }
-    .prog-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; }
-    .prog-pct { font-size:3rem; font-weight:800; color:var(--primary-dark); line-height:1; letter-spacing:-0.03em; }
-    .prog-sub { font-size:0.82rem; color:var(--muted); margin-top:6px; }
-    .prog-right { text-align:right; padding-top:4px; }
-    .prog-paid  { font-size:1.3rem; font-weight:700; color:var(--primary-dark); }
-    .prog-of    { font-size:0.78rem; color:var(--muted); margin-top:4px; }
-    .prog-track { background:var(--border); height:12px; border-radius:6px; overflow:hidden; margin-bottom:24px; }
+    .prog-top { text-align:center; margin-bottom:20px; }
+    .prog-pct { font-size:4.5rem; font-weight:800; color:var(--primary-dark); line-height:1; letter-spacing:-0.04em; }
+    .prog-sub { font-size:0.85rem; color:var(--muted); margin-top:8px; }
+    .prog-right { display:none; }
+    .prog-track { background:var(--border); height:14px; border-radius:7px; overflow:hidden; margin-bottom:20px; }
     .prog-fill  {
       height:100%;
       background:linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -315,10 +313,9 @@
       .header-sub { font-size:0.82rem; }
       .header-value-amount { font-size:1.55rem; }
       .main { padding:0 12px 40px; }
-      .progress-hero { padding:20px 16px 18px; }
-      .prog-pct  { font-size:2.2rem; }
-      .prog-paid { font-size:1.1rem; }
-      .prog-top  { margin-bottom:18px; }
+      .progress-hero { padding:24px 16px 18px; }
+      .prog-pct  { font-size:3.5rem; }
+      .prog-top  { margin-bottom:16px; }
       .stats-row { gap:7px; }
       .stat-box  { padding:12px 8px; }
       .stat-val  { font-size:0.88rem; }
@@ -358,14 +355,8 @@
   <!-- PROGRESO GENERAL -->
   <div class="progress-hero">
     <div class="prog-top">
-      <div>
-        <div class="prog-pct" id="pct">0%</div>
-        <div class="prog-sub">del lote pagado</div>
-      </div>
-      <div class="prog-right">
-        <div class="prog-paid" id="paidVal">$0</div>
-        <div class="prog-of">de $215,000</div>
-      </div>
+      <div class="prog-pct" id="pct">0%</div>
+      <div class="prog-sub"><span id="paidVal">$0</span> de $215,000 pagados</div>
     </div>
     <div class="prog-track">
       <div class="prog-fill" id="progFill" style="width:0%"></div>
