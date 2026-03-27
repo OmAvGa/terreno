@@ -86,15 +86,15 @@
       background:var(--card);
       border-radius:var(--radius);
       box-shadow:var(--shadow-lg);
-      padding:28px; margin-bottom:16px;
+      padding:28px 28px 24px; margin-bottom:16px;
     }
-    .prog-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
+    .prog-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; }
     .prog-pct { font-size:3rem; font-weight:800; color:var(--primary-dark); line-height:1; letter-spacing:-0.03em; }
-    .prog-sub { font-size:0.82rem; color:var(--muted); margin-top:4px; }
-    .prog-right { text-align:right; }
+    .prog-sub { font-size:0.82rem; color:var(--muted); margin-top:6px; }
+    .prog-right { text-align:right; padding-top:4px; }
     .prog-paid  { font-size:1.3rem; font-weight:700; color:var(--primary-dark); }
-    .prog-of    { font-size:0.78rem; color:var(--muted); }
-    .prog-track { background:var(--border); height:12px; border-radius:6px; overflow:hidden; margin-bottom:20px; }
+    .prog-of    { font-size:0.78rem; color:var(--muted); margin-top:4px; }
+    .prog-track { background:var(--border); height:12px; border-radius:6px; overflow:hidden; margin-bottom:24px; }
     .prog-fill  {
       height:100%;
       background:linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -284,15 +284,57 @@
       animation:fall linear forwards;
     }
 
+    /* ── ENGANCHE FIJO ── */
+    .abono-item.enganche-fijo { background:#f0fdf4; border-radius:10px; padding:13px 12px; margin-bottom:4px; border-bottom:none !important; }
+    .abono-item.enganche-fijo .abono-amt { color:var(--success); }
+    .enganche-tag {
+      display:inline-block; background:#d1fae5; color:#065f46;
+      font-size:0.65rem; font-weight:700; padding:2px 8px;
+      border-radius:20px; text-transform:uppercase; letter-spacing:0.06em;
+      margin-top:3px;
+    }
+
+    /* ── FOTO BOTONES ── */
+    .foto-btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .foto-btn {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:6px; padding:16px 10px;
+      border:2px dashed var(--border); border-radius:12px;
+      background:var(--bg); cursor:pointer;
+      font-family:inherit; font-size:0.8rem; font-weight:600; color:var(--muted);
+      transition:all 0.2s; position:relative;
+    }
+    .foto-btn:hover { border-color:var(--primary); background:var(--primary-light); color:var(--primary-dark); }
+    .foto-btn input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+    .foto-btn-icon { font-size:1.6rem; }
+
     /* ── RESPONSIVE ── */
     @media (max-width:560px) {
-      .header h1 { font-size:1.55rem; }
-      .prog-pct  { font-size:2.3rem; }
+      .header { padding:28px 16px 48px; }
+      .header h1 { font-size:1.45rem; }
+      .header-sub { font-size:0.82rem; }
+      .header-value-amount { font-size:1.55rem; }
+      .main { padding:0 12px 40px; }
+      .progress-hero { padding:20px 16px 18px; }
+      .prog-pct  { font-size:2.2rem; }
+      .prog-paid { font-size:1.1rem; }
+      .prog-top  { margin-bottom:18px; }
       .stats-row { gap:7px; }
-      .stat-val  { font-size:0.9rem; }
-      .weekly-amount { font-size:1.9rem; }
+      .stat-box  { padding:12px 8px; }
+      .stat-val  { font-size:0.88rem; }
+      .card { padding:18px 16px; }
+      .weekly-box { padding:18px 16px; }
+      .weekly-amount { font-size:2rem; }
+      .weekly-grid { gap:7px; }
+      .wg-item { padding:9px 10px; }
       .field-row { grid-template-columns:1fr; }
-      .header-value-amount { font-size:1.6rem; }
+      .foto-btns { grid-template-columns:1fr 1fr; }
+      .abono-thumb { width:46px; height:46px; }
+      .abono-no-photo { width:46px; height:46px; }
+    }
+    @media (min-width:700px) {
+      .weekly-grid { grid-template-columns:repeat(4,1fr); }
+      .stats-row   { grid-template-columns:repeat(3,1fr); }
     }
   </style>
 </head>
@@ -425,10 +467,19 @@
 
     <div class="field">
       <label class="field-label">Comprobante (foto opcional)</label>
-      <div class="foto-zone" id="fotoZone">
-        <input type="file" id="inFoto" accept="image/*" capture="environment" onchange="onFotoChange(event)">
-        <div class="foto-zone-icon">📷</div>
-        <div class="foto-zone-text">Toca para adjuntar foto del depósito</div>
+      <div id="fotoZone">
+        <div class="foto-btns">
+          <button type="button" class="foto-btn">
+            <input type="file" accept="image/*" capture="environment" onchange="onFotoChange(event)">
+            <span class="foto-btn-icon">📷</span>
+            <span>Cámara</span>
+          </button>
+          <button type="button" class="foto-btn">
+            <input type="file" accept="image/*" onchange="onFotoChange(event)">
+            <span class="foto-btn-icon">🖼</span>
+            <span>Galería</span>
+          </button>
+        </div>
       </div>
       <img class="foto-preview" id="fotoPreview" src="" alt="Vista previa">
       <button class="foto-clear" id="fotoClear" onclick="clearFoto()">✕ Quitar foto</button>
@@ -457,6 +508,7 @@
 <script>
   // ─── CONSTANTES ──────────────────────────────────────────
   const TOTAL    = 215000;
+  const ENGANCHE = 10000; // Siempre contado como pagado (requisito inicial)
   const DEADLINE = new Date(2027, 9, 31); // 31 Oct 2027
 
   // ─── ESTADO ──────────────────────────────────────────────
@@ -478,7 +530,7 @@
   }
 
   // ─── CÁLCULOS ────────────────────────────────────────────
-  const totalPagado   = () => abonos.reduce((s,a) => s + a.amount, 0);
+  const totalPagado   = () => ENGANCHE + abonos.reduce((s,a) => s + a.amount, 0);
   const totalFalta    = () => Math.max(TOTAL - totalPagado(), 0);
   const semanasLeft   = () => Math.max(Math.ceil((DEADLINE - Date.now()) / 6048e5), 0);
   const ahorroSemanal = () => {
@@ -545,7 +597,6 @@
 
   function clearFoto() {
     fotoBase64 = null;
-    document.getElementById('inFoto').value = '';
     document.getElementById('fotoPreview').classList.remove('show');
     document.getElementById('fotoPreview').src = '';
     document.getElementById('fotoClear').classList.remove('show');
@@ -615,7 +666,7 @@
     document.getElementById('pct').textContent       = pct.toFixed(1) + '%';
     document.getElementById('paidVal').textContent   = $$(paid);
     document.getElementById('progFill').style.width  = pct + '%';
-    document.getElementById('statAbonos').textContent = abonos.length;
+    document.getElementById('statAbonos').textContent = abonos.length + 1; // +1 enganche
     document.getElementById('statPaid').textContent  = $$(paid);
     document.getElementById('statRem').textContent   = $$(falta);
 
@@ -633,16 +684,15 @@
 
     // Lista abonos
     const cont = document.getElementById('abonosContainer');
+    const ul = document.createElement('ul');
+    ul.className = 'abono-list';
+
     if (abonos.length === 0) {
-      cont.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🧾</div>
-          No hay abonos registrados aún.<br>
-          Agrega tu primer pago para empezar el seguimiento.
-        </div>`;
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = `<div class="empty-icon">🧾</div>No hay abonos registrados aún.<br>Agrega tu primer pago para empezar el seguimiento.`;
+      ul.appendChild(empty);
     } else {
-      const ul = document.createElement('ul');
-      ul.className = 'abono-list';
       abonos.forEach(a => {
         const li = document.createElement('li');
         li.className = 'abono-item';
@@ -665,9 +715,25 @@
         li.querySelector('.abono-del').onclick = () => eliminarAbono(a.id);
         ul.appendChild(li);
       });
-      cont.innerHTML = '';
-      cont.appendChild(ul);
     }
+
+    // Enganche fijo siempre al final
+    const liEng = document.createElement('li');
+    liEng.className = 'abono-item enganche-fijo';
+    liEng.innerHTML = `
+      <div class="abono-no-photo" style="background:#d1fae5;border-color:#6ee7b7;">🔒</div>
+      <div class="abono-info">
+        <div class="abono-note">Enganche inicial</div>
+        <div class="abono-date">Septiembre 2025</div>
+        <div class="enganche-tag">Pagado · Requisito</div>
+      </div>
+      <div class="abono-right">
+        <div class="abono-amt">+${$$(ENGANCHE)}</div>
+      </div>`;
+    ul.appendChild(liEng);
+
+    cont.innerHTML = '';
+    cont.appendChild(ul);
 
     // Completion
     if (paid >= TOTAL) document.getElementById('completion').classList.add('show');
