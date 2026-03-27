@@ -739,46 +739,6 @@
     if (paid >= TOTAL) document.getElementById('completion').classList.add('show');
   }
 
-  function renderAlerta(paid, falta, sem) {
-    const box = document.getElementById('alertBox');
-    if (falta <= 0) {
-      box.innerHTML = `<div class="alert a-success">
-        <div class="alert-icon">🏡</div>
-        <div class="alert-text">
-          <div class="alert-title">¡Todo pagado!</div>
-          <div class="alert-desc">Completaste los $215,000 de tu lote. ¡Felicidades!</div>
-        </div></div>`;
-    } else if (sem <= 0) {
-      box.innerHTML = `<div class="alert a-danger">
-        <div class="alert-icon">🚨</div>
-        <div class="alert-text">
-          <div class="alert-title">Fecha límite vencida</div>
-          <div class="alert-desc">El plazo de Octubre 2027 ya pasó. Contacta al IJAVI.</div>
-        </div></div>`;
-    } else if (sem <= 8) {
-      box.innerHTML = `<div class="alert a-danger">
-        <div class="alert-icon">⚠️</div>
-        <div class="alert-text">
-          <div class="alert-title">¡Quedan solo ${sem} semanas!</div>
-          <div class="alert-desc">Faltan ${$$(falta)} para completar el lote. Acelera los abonos.</div>
-        </div></div>`;
-    } else if (sem <= 26) {
-      box.innerHTML = `<div class="alert a-warn">
-        <div class="alert-icon">📅</div>
-        <div class="alert-text">
-          <div class="alert-title">${sem} semanas para el vencimiento</div>
-          <div class="alert-desc">Faltan ${$$(falta)}. Ahorra ${$$(ahorroSemanal())} por semana para llegar a tiempo.</div>
-        </div></div>`;
-    } else {
-      box.innerHTML = `<div class="alert a-info">
-        <div class="alert-icon">💡</div>
-        <div class="alert-text">
-          <div class="alert-title">Llevas ${$$(paid)} acumulados</div>
-          <div class="alert-desc">Sigues en tiempo. Faltan ${$$(falta)} · ${sem} semanas disponibles.</div>
-        </div></div>`;
-    }
-  }
-
   // ─── INIT ────────────────────────────────────────────────
   cargar();
   render();
