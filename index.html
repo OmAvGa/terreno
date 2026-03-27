@@ -386,9 +386,6 @@
     </div>
   </div>
 
-  <!-- ALERTA -->
-  <div id="alertBox"></div>
-
   <!-- CALCULADORA SEMANAL -->
   <div class="weekly-box">
     <div class="weekly-label">Para llegar a $215,000, ahorra</div>
@@ -678,9 +675,6 @@
     document.getElementById('wgWeeks').textContent   = sem;
     document.getElementById('wgPagado').textContent  = $$(paid);
     document.getElementById('wgFalta').textContent   = $$(falta);
-
-    // Alerta
-    renderAlerta(paid, falta, sem);
 
     // Lista abonos
     const cont = document.getElementById('abonosContainer');
