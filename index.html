@@ -3,459 +3,1002 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Pagos Semanales</title>
-
-  <!-- Favicon clásico para navegadores -->
-  <link rel="icon" href="terreno.png" type="image/jpeg">
-
-  <!-- Icono para iPhone/iPad al agregar a la pantalla de inicio -->
+  <title>Lote Camino Oriente I — Seguimiento de Pagos</title>
+  <link rel="icon" href="terreno.png" type="image/png">
   <link rel="apple-touch-icon" href="terreno.png">
-
-  <!-- Hacer que la web se abra como app en iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Pagos">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mi Lote">
+  <meta name="theme-color" content="#1a535c">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <!-- Configuración para Android -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#FFF8E1">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    :root {
+      --primary: #2ec4b6;
+      --primary-dark: #1a535c;
+      --primary-light: #cbf3f0;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --danger: #ef476f;
+      --danger-bg: #fff1f4;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --radius: 16px;
+      --shadow: 0 2px 16px rgba(0,0,0,0.07);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(140deg, #0d3b47 0%, #1a535c 45%, #2c7873 100%);
+      color: white;
+      padding: 36px 20px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 320px; height: 320px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -40px;
+      width: 260px; height: 260px;
+      background: rgba(46,196,182,0.08);
+      border-radius: 50%;
+    }
+    .header-inner {
+      max-width: 880px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .header-badge {
+      display: inline-block;
+      background: rgba(46,196,182,0.2);
+      border: 1px solid rgba(46,196,182,0.35);
+      color: #7fe8e2;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .header-sub {
+      font-size: 0.88rem;
+      opacity: 0.65;
+    }
+    .header-value {
+      margin-top: 22px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .header-value-label {
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+    .header-value-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
 
-        h1 {
-            text-align: center;
-            color: #667eea;
-            margin-bottom: 30px;
-            font-size: 2em;
-        }
+    /* ── MAIN ── */
+    .main {
+      max-width: 880px;
+      margin: -32px auto 0;
+      padding: 0 16px 48px;
+    }
 
-        .progress-section {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
 
-        .progress-bar-container {
-            background: #e0e0e0;
-            height: 30px;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            position: relative;
-        }
+    /* ── PROGRESS HERO ── */
+    .progress-hero {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 28px;
+      margin-bottom: 16px;
+    }
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .progress-pct {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .progress-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+    .progress-right { text-align: right; }
+    .progress-paid-val { font-size: 1.3rem; font-weight: 700; color: var(--primary-dark); }
+    .progress-of { font-size: 0.78rem; color: var(--text-muted); }
+    .progress-track {
+      background: var(--border);
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 6px;
+      transition: width 0.7s cubic-bezier(0.34,1.2,0.64,1);
+      min-width: 0%;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .stat-box {
+      padding: 14px 10px;
+      border-radius: 12px;
+      background: var(--bg);
+      text-align: center;
+    }
+    .stat-box.s-paid   { background: #ecfdf5; }
+    .stat-box.s-rem    { background: #fff1f4; }
+    .stat-val {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stat-box.s-paid .stat-val { color: var(--success); }
+    .stat-box.s-rem  .stat-val { color: var(--danger); }
+    .stat-lbl { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; }
 
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.5s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
+    /* ── ALERT ── */
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      border-left: 4px solid transparent;
+    }
+    .alert.a-info    { background: #eff6ff; border-color: #3b82f6; }
+    .alert.a-success { background: var(--success-bg); border-color: #10b981; }
+    .alert.a-warn    { background: var(--warning-bg); border-color: #fbbf24; }
+    .alert.a-danger  { background: var(--danger-bg);  border-color: var(--danger); }
+    .alert-icon { font-size: 1.3rem; line-height: 1.3; flex-shrink: 0; }
+    .alert-title { font-weight: 600; font-size: 0.88rem; }
+    .alert-desc  { font-size: 0.79rem; color: var(--text-muted); margin-top: 2px; }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
+    /* ── SECTION HEADER ── */
+    .sec-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .sec-title { font-size: 1rem; font-weight: 700; }
+    .sec-sub   { font-size: 0.77rem; color: var(--text-muted); margin-top: 2px; }
+    .pill {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .pill-teal    { background: var(--primary-light); color: var(--primary-dark); }
+    .pill-green   { background: #d1fae5; color: #064e3b; }
+    .pill-yellow  { background: #fef3c7; color: #78350f; }
+    .pill-red     { background: #fee2e2; color: #7f1d1d; }
 
-        .stat-card {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+    /* ── ENGANCHE ── */
+    .enganche-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      background: white;
+      margin-bottom: 14px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .enganche-row:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(46,196,182,0.18); }
+    .enganche-row.paid { background: #ecfdf5; border-color: #10b981; }
+    .eng-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+    .eng-amount { font-size: 1.25rem; font-weight: 800; color: var(--primary-dark); margin: 2px 0; }
+    .enganche-row.paid .eng-amount { color: var(--success); }
+    .eng-date { font-size: 0.78rem; color: var(--text-muted); }
+    .eng-check { font-size: 1.6rem; }
 
-        .stat-label {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 5px;
-        }
+    /* ── PAYMENTS GRID ── */
+    .pay-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+      gap: 9px;
+    }
+    .pay-card {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 11px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      background: white;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pay-card:hover { border-color: var(--primary); box-shadow: 0 3px 10px rgba(46,196,182,0.18); }
+    .pay-card.paid     { background: #ecfdf5; border-color: #10b981; }
+    .pay-card.overdue  { background: var(--danger-bg); border-color: var(--danger); }
+    .pay-card.current  { background: var(--warning-bg); border-color: #fbbf24; }
+    .pay-num   { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .pay-month { font-size: 0.9rem; font-weight: 700; margin: 3px 0; }
+    .pay-amt   { font-size: 0.82rem; font-weight: 600; color: var(--primary-dark); }
+    .pay-card.paid    .pay-amt { color: var(--success); }
+    .pay-card.overdue .pay-amt { color: var(--danger); }
+    .pay-st { font-size: 0.7rem; margin-top: 5px; color: var(--text-muted); }
+    .pay-card.paid    .pay-st { color: var(--success); }
+    .pay-card.overdue .pay-st { color: var(--danger); }
+    .pay-card.current .pay-st { color: var(--warning); }
 
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #667eea;
-        }
+    /* ── WEEKLY CALC ── */
+    .weekly-box {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, #2c7873 100%);
+      color: white;
+      border-radius: 14px;
+      padding: 22px 20px;
+      margin-bottom: 16px;
+    }
+    .weekly-label { font-size: 0.72rem; font-weight: 600; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .weekly-amount { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .weekly-note { font-size: 0.8rem; opacity: 0.65; margin-bottom: 16px; }
+    .weekly-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .wg-item { background: rgba(255,255,255,0.1); border-radius: 9px; padding: 10px 12px; }
+    .wg-val  { font-size: 0.95rem; font-weight: 700; }
+    .wg-lbl  { font-size: 0.7rem; opacity: 0.65; margin-top: 2px; }
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
+    /* ── LIQ PROGRESS ── */
+    .liq-track {
+      background: var(--border);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 10px 0 16px;
+    }
+    .liq-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
 
-        .view-toggle {
-            display: flex;
-            gap: 10px;
-        }
+    /* ── ABONOS ── */
+    .abonos-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .abonos-title { font-size: 0.9rem; font-weight: 600; }
+    .abono-list { list-style: none; }
+    .abono-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .abono-item:last-child { border-bottom: none; }
+    .abono-note { font-size: 0.88rem; font-weight: 500; }
+    .abono-date { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; }
+    .abono-right { display: flex; align-items: center; gap: 10px; }
+    .abono-amt { font-size: 0.95rem; font-weight: 700; color: var(--success); }
+    .abono-del { background: none; border: none; cursor: pointer; color: var(--danger); opacity: 0.5; font-size: 0.85rem; padding: 4px; line-height: 1; }
+    .abono-del:hover { opacity: 1; }
+    .empty-state {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      line-height: 1.7;
+    }
 
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s ease;
-            background: #667eea;
-            color: white;
-        }
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 11px 22px;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(46,196,182,0.38); }
+    .btn-ghost { background: transparent; border: 2px solid var(--border); color: var(--text-muted); }
+    .btn-ghost:hover { border-color: var(--danger); color: var(--danger); }
+    .btn-sm { padding: 7px 14px; font-size: 0.8rem; }
+    .btn-full { width: 100%; justify-content: center; }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.55);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: white;
+      border-radius: 22px 22px 0 0;
+      padding: 20px 22px 40px;
+      width: 100%; max-width: 500px;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.34,1.3,0.64,1);
+    }
+    .overlay.open .modal { transform: translateY(0); }
+    .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+    .modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 18px; }
+    .field { margin-bottom: 14px; }
+    .field-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+    .field-input {
+      width: 100%;
+      padding: 13px 15px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field-input:focus { border-color: var(--primary); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-        .btn.active {
-            background: #764ba2;
-        }
+    /* ── COMPLETION ── */
+    .completion {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.7);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .completion.show { display: flex; }
+    .completion-box {
+      background: white;
+      border-radius: 22px;
+      padding: 44px 32px;
+      text-align: center;
+      max-width: 360px;
+      width: 100%;
+    }
+    .completion-emoji { font-size: 4.5rem; margin-bottom: 16px; display: block; }
+    .completion-title { font-size: 1.6rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 8px; }
+    .completion-text { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 24px; }
 
-        .payments-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-        }
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
 
-        .payment-item {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
+    /* ── CONFETTI ── */
+    @keyframes fall {
+      0%   { transform: translateY(-80px) rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+    }
+    .conf {
+      position: fixed; pointer-events: none; z-index: 400;
+      width: 9px; height: 9px; border-radius: 2px;
+      animation: fall linear forwards;
+    }
 
-        .payment-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-        }
+    /* ── POP ── */
+    @keyframes pop {
+      0%   { transform: scale(0.93); }
+      55%  { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+    .do-pop { animation: pop 0.28s ease; }
 
-        .payment-item.paid {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            border-color: #11998e;
-            color: white;
-        }
-
-        .payment-item.paid::before {
-            content: '✓';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 2em;
-            font-weight: bold;
-            opacity: 0.3;
-        }
-
-        .payment-date {
-            font-weight: bold;
-            font-size: 1.1em;
-            margin-bottom: 8px;
-        }
-
-        .payment-amount {
-            font-size: 1.2em;
-            color: #667eea;
-        }
-
-        .payment-item.paid .payment-amount {
-            color: white;
-        }
-
-        .payment-number {
-            font-size: 0.9em;
-            opacity: 0.7;
-            margin-bottom: 5px;
-        }
-
-        @keyframes checkmark {
-            0% {
-                transform: scale(0) rotate(0deg);
-            }
-            50% {
-                transform: scale(1.2) rotate(180deg);
-            }
-            100% {
-                transform: scale(1) rotate(360deg);
-            }
-        }
-
-        .payment-item.just-paid {
-            animation: checkmark 0.5s ease;
-        }
-
-        .completion-message {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-            font-weight: bold;
-            display: none;
-        }
-
-        .completion-message.show {
-            display: block;
-            animation: slideDown 0.5s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-
-            h1 {
-                font-size: 1.5em;
-            }
-
-            .payments-container {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    /* ── RESPONSIVE ── */
+    @media (max-width: 560px) {
+      .header h1 { font-size: 1.55rem; }
+      .progress-pct { font-size: 2.3rem; }
+      .stats-row { gap: 7px; }
+      .stat-val { font-size: 0.9rem; }
+      .weekly-amount { font-size: 1.75rem; }
+      .weekly-grid { grid-template-columns: 1fr 1fr; }
+      .pay-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); }
+      .field-row { grid-template-columns: 1fr; }
+      .header-value-amount { font-size: 1.6rem; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Registro de Pagos Semanales</h1>
 
-        <div class="completion-message" id="completionMessage">
-            Ya tenemos terreno mi amor ❤️
-        </div>
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-badge">Fraccionamiento Municipal · IJAVI</div>
+    <h1>Camino Oriente I</h1>
+    <div class="header-sub">90 m² · No esquina · No frente a donación</div>
+    <div class="header-value">
+      <span class="header-value-label">Valor total del lote</span>
+      <span class="header-value-amount">$215,000</span>
+    </div>
+  </div>
+</header>
 
-        <div class="progress-section">
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progressBar">0%</div>
-            </div>
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-label">Pagos Realizados</div>
-                    <div class="stat-value" id="paidCount">0 / 0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total Pagado</div>
-                    <div class="stat-value" id="paidAmount">$0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Falta por Pagar</div>
-                    <div class="stat-value" id="remainingAmount">$205,000</div>
-                </div>
-            </div>
-        </div>
+<main class="main">
 
-        <div class="controls">
-            <div class="view-toggle">
-                <button class="btn active" id="weeklyBtn" onclick="setPaymentMode('weekly')">Semanal</button>
-                <button class="btn" id="monthlyBtn" onclick="setPaymentMode('monthly')">Mensual</button>
-            </div>
-        </div>
+  <!-- PROGRESS HERO -->
+  <div class="progress-hero">
+    <div class="progress-top">
+      <div>
+        <div class="progress-pct" id="pct">0%</div>
+        <div class="progress-sub">del lote pagado</div>
+      </div>
+      <div class="progress-right">
+        <div class="progress-paid-val" id="paidVal">$0</div>
+        <div class="progress-of">de $215,000</div>
+      </div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progFill" style="width:0%"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val" id="statMens">0/24</div>
+        <div class="stat-lbl">Mensualidades</div>
+      </div>
+      <div class="stat-box s-paid">
+        <div class="stat-val" id="statPaid">$0</div>
+        <div class="stat-lbl">Pagado</div>
+      </div>
+      <div class="stat-box s-rem">
+        <div class="stat-val" id="statRem">$215,000</div>
+        <div class="stat-lbl">Falta pagar</div>
+      </div>
+    </div>
+  </div>
 
-        <div class="payments-container" id="paymentsContainer"></div>
+  <!-- ALERT: NEXT PAYMENT -->
+  <div id="alertBox"></div>
+
+  <!-- MENSUALIDADES -->
+  <div class="card">
+    <div class="sec-hdr">
+      <div>
+        <div class="sec-title">Pagos mensuales</div>
+        <div class="sec-sub">Enganche + 24 mensualidades de $2,000</div>
+      </div>
+      <span class="pill pill-teal" id="mensCount">0 de 25</span>
     </div>
 
-    <script>
-        const WEEKLY_PAYMENT = 2000;
-        const MONTHLY_PAYMENT = 8550; // Pago mensual redondeado
-        const GOAL_AMOUNT = 205000;
-        const TOTAL_WEEKS = 104;
-        const TOTAL_MONTHS = 24;
+    <!-- ENGANCHE -->
+    <div class="enganche-row" id="engancheRow" onclick="toggleEnganche()">
+      <div>
+        <div class="eng-label">Enganche</div>
+        <div class="eng-amount">$10,000</div>
+        <div class="eng-date">Septiembre 2025</div>
+      </div>
+      <div class="eng-check" id="engCheck">⬜</div>
+    </div>
 
-        let payments = {};
-        let paymentMode = 'weekly'; // 'weekly' o 'monthly'
+    <!-- GRID 24 MESES -->
+    <div class="pay-grid" id="payGrid"></div>
+  </div>
 
-        function initializePayments() {
-            const paymentDates = [];
+  <!-- LIQUIDACIÓN -->
+  <div class="card">
+    <div class="sec-hdr">
+      <div>
+        <div class="sec-title">Liquidación</div>
+        <div class="sec-sub">Fecha límite: Octubre 2027</div>
+      </div>
+      <span class="pill" id="liqPill">$157,000 restante</span>
+    </div>
 
-            if (paymentMode === 'weekly') {
-                // Generar 104 pagos semanales - primer lunes de octubre 2025
-                const startDate = new Date(2025, 9, 6); // 6 de octubre 2025 (primer lunes)
-                let currentDate = new Date(startDate);
-                
-                for (let i = 0; i < TOTAL_WEEKS; i++) {
-                    paymentDates.push(new Date(currentDate));
-                    currentDate.setDate(currentDate.getDate() + 7);
-                }
-            } else {
-                // Generar 24 pagos mensuales - último lunes de cada mes
-                let year = 2025;
-                let month = 9; // Octubre (0-indexed)
-                
-                for (let i = 0; i < TOTAL_MONTHS; i++) {
-                    // Obtener el último día del mes
-                    const lastDay = new Date(year, month + 1, 0);
-                    const lastDayOfMonth = lastDay.getDate();
-                    
-                    // Buscar el último lunes del mes
-                    let lastMonday = new Date(year, month, lastDayOfMonth);
-                    while (lastMonday.getDay() !== 1) {
-                        lastMonday.setDate(lastMonday.getDate() - 1);
-                    }
-                    
-                    paymentDates.push(new Date(lastMonday));
-                    
-                    // Avanzar al siguiente mes
-                    month++;
-                    if (month > 11) {
-                        month = 0;
-                        year++;
-                    }
-                }
-            }
+    <!-- CALCULADORA SEMANAL -->
+    <div class="weekly-box">
+      <div class="weekly-label">Para llegar a $215,000, ahorra</div>
+      <div class="weekly-amount" id="weeklyAmt">$0</div>
+      <div class="weekly-note" id="weeklyNote">por semana para liquidar a tiempo</div>
+      <div class="weekly-grid">
+        <div class="wg-item">
+          <div class="wg-val" id="wgWeeks">—</div>
+          <div class="wg-lbl">Semanas restantes</div>
+        </div>
+        <div class="wg-item">
+          <div class="wg-val">Oct 2027</div>
+          <div class="wg-lbl">Fecha límite</div>
+        </div>
+        <div class="wg-item">
+          <div class="wg-val" id="wgAbonado">$0</div>
+          <div class="wg-lbl">Total acumulado</div>
+        </div>
+        <div class="wg-item">
+          <div class="wg-val" id="wgPorLiquidar">$215,000</div>
+          <div class="wg-lbl">Por completar</div>
+        </div>
+      </div>
+    </div>
 
-            return paymentDates;
+    <!-- BARRA LIQUIDACIÓN -->
+    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">
+      <span>Avance hacia $215,000</span>
+      <span id="liqPct">0%</span>
+    </div>
+    <div class="liq-track">
+      <div class="liq-fill" id="liqFill" style="width:0%"></div>
+    </div>
+
+    <!-- ABONOS -->
+    <div class="abonos-header">
+      <div class="abonos-title">Abonos registrados</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal()">+ Agregar abono</button>
+    </div>
+    <div id="abonosContainer">
+      <div class="empty-state">
+        Sin abonos registrados.<br>
+        Agrega un pago para ver tu avance hacia la liquidación.
+      </div>
+    </div>
+  </div>
+
+  <!-- RESET -->
+  <div style="text-align:center;margin-top:4px">
+    <button class="btn btn-ghost btn-sm" onclick="confirmReset()">Reiniciar todo</button>
+  </div>
+
+</main>
+
+<footer class="footer">
+  Los datos se guardan localmente en este dispositivo · Instituto Jalisciense de la Vivienda
+</footer>
+
+<!-- MODAL: AGREGAR ABONO -->
+<div class="overlay" id="overlay" onclick="outsideClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Agregar abono a liquidación</div>
+    <div class="field">
+      <label class="field-label" for="inAmount">Monto del abono (MXN)</label>
+      <input class="field-input" type="number" id="inAmount" placeholder="Ej: 5000" min="1" step="100">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label" for="inDate">Fecha del abono</label>
+        <input class="field-input" type="date" id="inDate">
+      </div>
+      <div class="field">
+        <label class="field-label" for="inNote">Nota (opcional)</label>
+        <input class="field-input" type="text" id="inNote" placeholder="Ej: Quincena">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveAbono()">Guardar abono</button>
+  </div>
+</div>
+
+<!-- COMPLETION -->
+<div class="completion" id="completion">
+  <div class="completion-box">
+    <span class="completion-emoji">🏡</span>
+    <div class="completion-title">¡Ya es tuyo!</div>
+    <div class="completion-text">Completaste el pago de tu lote en Camino Oriente I. ¡Felicidades!</div>
+    <button class="btn btn-primary btn-full" onclick="document.getElementById('completion').classList.remove('show')">Cerrar</button>
+  </div>
+</div>
+
+<script>
+  // ─── CONSTANTES ──────────────────────────────────────────
+  const TOTAL      = 215000;
+  const ENGANCHE   = 10000;
+  const MENSUAL    = 2000;
+  const LIQ_TOTAL  = 157000;
+  const DEADLINE   = new Date(2027, 9, 31); // 31 Oct 2027
+
+  const MESES = [
+    'Oct 2025','Nov 2025','Dic 2025',
+    'Ene 2026','Feb 2026','Mar 2026','Abr 2026','May 2026','Jun 2026',
+    'Jul 2026','Ago 2026','Sep 2026','Oct 2026','Nov 2026','Dic 2026',
+    'Ene 2027','Feb 2027','Mar 2027','Abr 2027','May 2027','Jun 2027',
+    'Jul 2027','Ago 2027','Sep 2027',
+  ];
+  // year/month (0-indexed) de cada mensualidad
+  const MESES_DATE = [
+    [2025,9],[2025,10],[2025,11],
+    [2026,0],[2026,1],[2026,2],[2026,3],[2026,4],[2026,5],
+    [2026,6],[2026,7],[2026,8],[2026,9],[2026,10],[2026,11],
+    [2027,0],[2027,1],[2027,2],[2027,3],[2027,4],[2027,5],
+    [2027,6],[2027,7],[2027,8],
+  ];
+
+  // ─── ESTADO ──────────────────────────────────────────────
+  let st = {
+    enganche: false,
+    meses: new Array(24).fill(false),
+    abonos: []           // { id, date, amount, note }
+  };
+
+  // ─── STORAGE ─────────────────────────────────────────────
+  function guardar() { localStorage.setItem('co1_v2', JSON.stringify(st)); }
+
+  function cargar() {
+    try {
+      const raw = localStorage.getItem('co1_v2');
+      if (!raw) return;
+      const p = JSON.parse(raw);
+      st.enganche = !!p.enganche;
+      st.abonos   = Array.isArray(p.abonos) ? p.abonos : [];
+      if (Array.isArray(p.meses)) {
+        for (let i = 0; i < 24; i++) st.meses[i] = !!p.meses[i];
+      }
+    } catch(e) { /* defaults */ }
+  }
+
+  // ─── CÁLCULOS ────────────────────────────────────────────
+  const totalAbonos   = () => st.abonos.reduce((s,a) => s + a.amount, 0);
+  const liqRestante   = () => Math.max(TOTAL - totalPagado(), 0);
+  const mesesPagados  = () => st.meses.filter(Boolean).length;
+
+  function totalPagado() {
+    return (st.enganche ? ENGANCHE : 0) + mesesPagados() * MENSUAL + totalAbonos();
+  }
+
+  function semanasRestantes() {
+    const diff = DEADLINE - Date.now();
+    return Math.max(Math.ceil(diff / 6048e5), 0); // 6048e5 = 7*24*60*60*1000
+  }
+
+  function ahorroSemanal() {
+    const s = semanasRestantes();
+    const r = liqRestante();
+    if (r <= 0) return 0;
+    if (s <= 0) return r;
+    return Math.ceil(r / s);
+  }
+
+  function statusMes(i) {
+    if (st.meses[i]) return 'paid';
+    const hoy    = new Date();
+    const mesHoy = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    const mesRef = new Date(MESES_DATE[i][0], MESES_DATE[i][1], 1);
+    if (mesRef < mesHoy)  return 'overdue';
+    if (mesRef.getTime() === mesHoy.getTime()) return 'current';
+    return 'pending';
+  }
+
+  // ─── FORMATO ─────────────────────────────────────────────
+  function $$(n) {
+    return new Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN', maximumFractionDigits:0 }).format(n);
+  }
+  function fmtFecha(str) {
+    const d = new Date(str + 'T12:00:00');
+    return d.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
+  }
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ─── ACCIONES ────────────────────────────────────────────
+  function toggleEnganche() {
+    st.enganche = !st.enganche;
+    guardar(); render();
+    if (st.enganche) confeti();
+  }
+
+  function toggleMes(i) {
+    st.meses[i] = !st.meses[i];
+    guardar(); render();
+    if (st.meses[i]) confeti();
+  }
+
+  function saveAbono() {
+    const amount = parseFloat(document.getElementById('inAmount').value);
+    const date   = document.getElementById('inDate').value;
+    const note   = document.getElementById('inNote').value.trim() || 'Abono';
+    if (!amount || amount <= 0 || !date) {
+      alert('Ingresa el monto y la fecha.'); return;
+    }
+    st.abonos.unshift({ id: Date.now(), date, amount, note });
+    guardar(); render();
+    closeModal(); confeti();
+  }
+
+  function eliminarAbono(id) {
+    if (!confirm('¿Eliminar este abono?')) return;
+    st.abonos = st.abonos.filter(a => a.id !== id);
+    guardar(); render();
+  }
+
+  function confirmReset() {
+    if (confirm('¿Reiniciar todo el progreso? Esta acción no se puede deshacer.')) {
+      st = { enganche: false, meses: new Array(24).fill(false), abonos: [] };
+      guardar(); render();
+    }
+  }
+
+  // ─── MODAL ───────────────────────────────────────────────
+  function openModal() {
+    document.getElementById('inDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('inAmount').value = '';
+    document.getElementById('inNote').value = '';
+    document.getElementById('overlay').classList.add('open');
+    setTimeout(() => document.getElementById('inAmount').focus(), 350);
+  }
+  function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+  function outsideClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+
+  // ─── CONFETI ─────────────────────────────────────────────
+  function confeti() {
+    const cols = ['#2ec4b6','#06d6a0','#ffd166','#ef476f','#3b82f6','#a78bfa'];
+    for (let i = 0; i < 35; i++) {
+      const el = document.createElement('div');
+      el.className = 'conf';
+      el.style.cssText = `
+        left:${Math.random()*100}vw;top:-12px;
+        background:${cols[i % cols.length]};
+        animation-duration:${1.5+Math.random()*1.2}s;
+        animation-delay:${Math.random()*0.5}s;
+        transform:rotate(${Math.random()*360}deg);
+        width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;
+        border-radius:${Math.random()>0.5?'50%':'2px'};
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
+  }
+
+  // ─── RENDER ──────────────────────────────────────────────
+  function render() {
+    const paid    = totalPagado();
+    const pct     = Math.min((paid / TOTAL) * 100, 100);
+    const rem     = Math.max(TOTAL - paid, 0);
+    const liqAb   = totalAbonos();
+    const liqRem  = liqRestante();
+    const liqPct  = Math.min((paid / TOTAL) * 100, 100);
+    const semanas = semanasRestantes();
+    const semanal = ahorroSemanal();
+    const mPagados = mesesPagados();
+
+    // ── Progreso principal
+    document.getElementById('pct').textContent       = pct.toFixed(1) + '%';
+    document.getElementById('paidVal').textContent   = $$(paid);
+    document.getElementById('progFill').style.width  = pct + '%';
+    document.getElementById('statMens').textContent  = mPagados + '/24';
+    document.getElementById('statPaid').textContent  = $$(paid);
+    document.getElementById('statRem').textContent   = $$(rem);
+
+    // ── Contador mensualidades
+    const engPagado = st.enganche ? 1 : 0;
+    document.getElementById('mensCount').textContent = `${engPagado + mPagados} de 25`;
+
+    // ── Alerta próximo pago
+    renderAlerta();
+
+    // ── Enganche
+    const er = document.getElementById('engancheRow');
+    er.className = 'enganche-row' + (st.enganche ? ' paid' : '');
+    document.getElementById('engCheck').textContent = st.enganche ? '✅' : '⬜';
+
+    // ── Grid mensualidades
+    const grid = document.getElementById('payGrid');
+    grid.innerHTML = '';
+    const statusLabel = { paid:'✓ Pagado', overdue:'⚠ Vencido', current:'→ Pagar ahora', pending:'Pendiente' };
+    MESES.forEach((mes, i) => {
+      const s = statusMes(i);
+      const c = document.createElement('div');
+      c.className = 'pay-card ' + s;
+      c.innerHTML = `
+        <div class="pay-num">Mensualidad ${i+1}</div>
+        <div class="pay-month">${mes}</div>
+        <div class="pay-amt">${$$( MENSUAL )}</div>
+        <div class="pay-st">${statusLabel[s]}</div>
+      `;
+      c.onclick = () => {
+        toggleMes(i);
+        c.classList.add('do-pop');
+        setTimeout(() => c.classList.remove('do-pop'), 300);
+      };
+      grid.appendChild(c);
+    });
+
+    // ── Calculadora semanal
+    document.getElementById('weeklyAmt').textContent = $$(semanal);
+    document.getElementById('weeklyNote').textContent = semanas > 0
+      ? `por semana · ${semanas} semanas para el vencimiento`
+      : (liqRem > 0 ? 'La fecha límite ya venció' : '¡Liquidación completada!');
+    document.getElementById('wgWeeks').textContent     = semanas;
+    document.getElementById('wgAbonado').textContent   = $$(paid);
+    document.getElementById('wgPorLiquidar').textContent = $$(liqRem);
+
+    // ── Pill liquidación
+    const pill = document.getElementById('liqPill');
+    if (liqRem === 0) {
+      pill.className = 'pill pill-green';
+      pill.textContent = '¡Liquidación completa!';
+    } else {
+      pill.className = 'pill pill-yellow';
+      pill.textContent = $$(liqRem) + ' restante';
+    }
+    document.getElementById('liqPct').textContent     = liqPct.toFixed(1) + '%';
+    document.getElementById('liqFill').style.width    = liqPct + '%';
+
+    // ── Abonos
+    const cont = document.getElementById('abonosContainer');
+    if (st.abonos.length === 0) {
+      cont.innerHTML = `<div class="empty-state">Sin abonos registrados.<br>Agrega un pago para ver tu avance hacia la liquidación.</div>`;
+    } else {
+      const ul = document.createElement('ul');
+      ul.className = 'abono-list';
+      st.abonos.forEach(a => {
+        const li = document.createElement('li');
+        li.className = 'abono-item';
+        li.innerHTML = `
+          <div>
+            <div class="abono-note">${esc(a.note)}</div>
+            <div class="abono-date">${fmtFecha(a.date)}</div>
+          </div>
+          <div class="abono-right">
+            <div class="abono-amt">+${$$(a.amount)}</div>
+            <button class="abono-del" onclick="eliminarAbono(${a.id})" title="Eliminar">✕</button>
+          </div>
+        `;
+        ul.appendChild(li);
+      });
+      cont.innerHTML = '';
+      cont.appendChild(ul);
+    }
+
+    // ── Completion
+    if (paid >= TOTAL) {
+      document.getElementById('completion').classList.add('show');
+    }
+  }
+
+  function renderAlerta() {
+    const box = document.getElementById('alertBox');
+    const hoy = new Date();
+    const anoHoy = hoy.getFullYear(), mesHoy = hoy.getMonth();
+
+    // Enganche pendiente
+    if (!st.enganche && new Date() >= new Date(2025, 8, 1)) {
+      box.innerHTML = `<div class="alert a-warn">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-text">
+          <div class="alert-title">Enganche pendiente</div>
+          <div class="alert-desc">El enganche de $10,000 debió pagarse en Septiembre 2025.</div>
+        </div></div>`;
+      return;
+    }
+
+    // Buscar primera mensualidad sin pagar
+    for (let i = 0; i < 24; i++) {
+      if (!st.meses[i]) {
+        const [y, m] = MESES_DATE[i];
+        const mesRef = new Date(y, m, 1);
+        const mesHoyDate = new Date(anoHoy, mesHoy, 1);
+        const isCurrent = y === anoHoy && m === mesHoy;
+        const isOverdue = mesRef < mesHoyDate;
+
+        if (isOverdue) {
+          box.innerHTML = `<div class="alert a-danger">
+            <div class="alert-icon">🚨</div>
+            <div class="alert-text">
+              <div class="alert-title">Mensualidad ${i+1} vencida</div>
+              <div class="alert-desc">${MESES[i]} — ${$$(MENSUAL)}. Pagar a tiempo preserva los honorarios notariales incluidos.</div>
+            </div></div>`;
+        } else if (isCurrent) {
+          box.innerHTML = `<div class="alert a-info">
+            <div class="alert-icon">📅</div>
+            <div class="alert-text">
+              <div class="alert-title">Pago del mes en curso</div>
+              <div class="alert-desc">Mensualidad ${i+1} — ${MESES[i]} — ${$$(MENSUAL)}. Págala antes de que termine el mes.</div>
+            </div></div>`;
+        } else {
+          box.innerHTML = `<div class="alert a-success">
+            <div class="alert-icon">✅</div>
+            <div class="alert-text">
+              <div class="alert-title">Pagos al día</div>
+              <div class="alert-desc">Próximo: Mensualidad ${i+1} — ${MESES[i]} — ${$$(MENSUAL)}</div>
+            </div></div>`;
         }
+        return;
+      }
+    }
 
-        function loadFromStorage() {
-            const stored = window.localStorage.getItem('paymentProgress');
-            if (stored) {
-                payments = JSON.parse(stored);
-            }
-            
-            const storedMode = window.localStorage.getItem('paymentMode');
-            if (storedMode) {
-                paymentMode = storedMode;
-            }
-        }
+    // Todas las mensualidades pagadas
+    if (liqRestante() > 0) {
+      box.innerHTML = `<div class="alert a-info">
+        <div class="alert-icon">🏁</div>
+        <div class="alert-text">
+          <div class="alert-title">¡24 mensualidades completadas!</div>
+          <div class="alert-desc">Ahora enfócate en reunir la liquidación de ${$$(LIQ_TOTAL)} antes de Octubre 2027.</div>
+        </div></div>`;
+    } else {
+      box.innerHTML = `<div class="alert a-success">
+        <div class="alert-icon">🏡</div>
+        <div class="alert-text">
+          <div class="alert-title">¡Todo pagado!</div>
+          <div class="alert-desc">Completaste todos los pagos de tu lote. ¡Felicidades!</div>
+        </div></div>`;
+    }
+  }
 
-        function saveToStorage() {
-            window.localStorage.setItem('paymentProgress', JSON.stringify(payments));
-            window.localStorage.setItem('paymentMode', paymentMode);
-        }
-
-        function formatDate(date) {
-            const options = { day: '2-digit', month: 'long', year: 'numeric' };
-            return date.toLocaleDateString('es-MX', options);
-        }
-
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('es-MX', {
-                style: 'currency',
-                currency: 'MXN'
-            }).format(amount);
-        }
-
-        function togglePayment(dateStr) {
-            const paymentAmount = paymentMode === 'weekly' ? WEEKLY_PAYMENT : MONTHLY_PAYMENT;
-            const totalPaid = Object.values(payments).filter(p => p).length * paymentAmount;
-            
-            if (!payments[dateStr] && totalPaid >= GOAL_AMOUNT) {
-                return;
-            }
-
-            payments[dateStr] = !payments[dateStr];
-            saveToStorage();
-            render();
-        }
-
-        function updateProgress() {
-            const paymentAmount = paymentMode === 'weekly' ? WEEKLY_PAYMENT : MONTHLY_PAYMENT;
-            const totalPayments = paymentMode === 'weekly' ? TOTAL_WEEKS : TOTAL_MONTHS;
-            const paidCount = Object.values(payments).filter(p => p).length;
-            const paidAmount = paidCount * paymentAmount;
-            const remainingAmount = GOAL_AMOUNT - paidAmount;
-            const percentage = Math.min((paidAmount / GOAL_AMOUNT) * 100, 100);
-
-            document.getElementById('progressBar').style.width = percentage + '%';
-            document.getElementById('progressBar').textContent = percentage.toFixed(1) + '%';
-            document.getElementById('paidCount').textContent = `${paidCount} / ${totalPayments}`;
-            document.getElementById('paidAmount').textContent = formatCurrency(paidAmount);
-            document.getElementById('remainingAmount').textContent = formatCurrency(Math.max(remainingAmount, 0));
-
-            const completionMsg = document.getElementById('completionMessage');
-            if (paidAmount >= GOAL_AMOUNT) {
-                completionMsg.classList.add('show');
-            } else {
-                completionMsg.classList.remove('show');
-            }
-        }
-
-        function setPaymentMode(mode) {
-            paymentMode = mode;
-            saveToStorage();
-            
-            document.getElementById('weeklyBtn').classList.toggle('active', mode === 'weekly');
-            document.getElementById('monthlyBtn').classList.toggle('active', mode === 'monthly');
-            
-            render();
-        }
-
-        function render() {
-            const paymentAmount = paymentMode === 'weekly' ? WEEKLY_PAYMENT : MONTHLY_PAYMENT;
-            const paymentDates = initializePayments();
-            const container = document.getElementById('paymentsContainer');
-            container.innerHTML = '';
-
-            paymentDates.forEach((date, index) => {
-                const dateStr = date.toISOString().split('T')[0];
-                const isPaid = payments[dateStr] || false;
-
-                const item = document.createElement('div');
-                item.className = 'payment-item' + (isPaid ? ' paid' : '');
-                item.onclick = function() {
-                    togglePayment(dateStr);
-                    if (!isPaid) {
-                        item.classList.add('just-paid');
-                        setTimeout(() => item.classList.remove('just-paid'), 500);
-                    }
-                };
-
-                item.innerHTML = `
-                    <div class="payment-number">Pago #${index + 1}</div>
-                    <div class="payment-date">${formatDate(date)}</div>
-                    <div class="payment-amount">${formatCurrency(paymentAmount)}</div>
-                `;
-
-                container.appendChild(item);
-            });
-
-            updateProgress();
-        }
-
-        loadFromStorage();
-        render();
-    </script>
+  // ─── INIT ────────────────────────────────────────────────
+  cargar();
+  render();
+</script>
 </body>
 </html>
