@@ -1,7 +1,9 @@
-const CACHE = 'milote-v1';
+const CACHE = 'milote-v2';
 const ASSETS = [
   '/terreno/',
   '/terreno/index.html',
+  '/terreno/css/styles.css',
+  '/terreno/js/app.js',
   '/terreno/terreno.png',
   '/terreno/manifest.json'
 ];
