@@ -1,23 +1,57 @@
-import { initializeApp }       from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc,
-         onSnapshot, query, orderBy, writeBatch, getDocs,
-         serverTimestamp }     from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithRedirect,
-         getRedirectResult, signOut,
-         onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+// ─── INDEXEDDB ───────────────────────────────────────────
+const DB_NAME  = 'milote';
+const DB_VER   = 1;
+const STORE    = 'abonos';
 
-// ─── FIREBASE ────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey:            "AIzaSyDxDRYD9EOmUstnq180eqCu0QAJJ0I9OxM",
-  authDomain:        "terreno-330ff.firebaseapp.com",
-  projectId:         "terreno-330ff",
-  storageBucket:     "terreno-330ff.firebasestorage.app",
-  messagingSenderId: "127285522519",
-  appId:             "1:127285522519:web:fbb5af77d57d96f0037312"
-};
-const fireApp = initializeApp(firebaseConfig);
-const db      = getFirestore(fireApp);
-const auth    = getAuth(fireApp);
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function dbGetAll() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result.sort((a, b) => b.createdAt - a.createdAt));
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function dbAdd(data) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE, 'readwrite').objectStore(STORE).add({ ...data, createdAt: Date.now() });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function dbDelete(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE, 'readwrite').objectStore(STORE).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function dbClear() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE, 'readwrite').objectStore(STORE).clear();
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
 
 // ─── CONSTANTES ──────────────────────────────────────────
 const TOTAL    = 215000;
@@ -25,57 +59,15 @@ const ENGANCHE = 10000;
 const DEADLINE = new Date(2027, 9, 31);
 
 // ─── ESTADO ──────────────────────────────────────────────
-let abonos      = [];
-let unsubscribe = null;
+let abonos = [];
 
-// ─── AUTH ────────────────────────────────────────────────
-onAuthStateChanged(auth, user => {
-  if (user) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('userName').textContent = user.displayName || user.email;
-    const av = document.getElementById('userAvatar');
-    if (user.photoURL) { av.src = user.photoURL; av.style.display = 'block'; }
-    else { av.style.display = 'none'; }
-
-    // Datos propios del usuario
-    const abonosCol = collection(db, 'usuarios', user.uid, 'abonos');
-    const q = query(abonosCol, orderBy('createdAt', 'desc'));
-    unsubscribe = onSnapshot(q, snapshot => {
-      abonos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      render();
-    });
-  } else {
-    document.getElementById('loginScreen').style.display = 'flex';
-    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
-    abonos = [];
-    render();
-  }
-});
-
-function getAbonosCol() {
-  return collection(db, 'usuarios', auth.currentUser.uid, 'abonos');
+async function cargarAbonos() {
+  abonos = await dbGetAll();
+  render();
 }
 
-// Captura el resultado al volver del redirect de Google
-getRedirectResult(auth).catch(err => {
-  alert('Error de login: ' + err.code + '\n' + err.message);
-});
-
-window.loginGoogle = async function() {
-  try {
-    await signInWithRedirect(auth, new GoogleAuthProvider());
-  } catch(err) {
-    alert('Error: ' + err.code);
-  }
-};
-
-window.logout = async function() {
-  if (!confirm('¿Cerrar sesión?')) return;
-  await signOut(auth);
-};
-
 // ─── CÁLCULOS ────────────────────────────────────────────
-const totalPagado   = () => ENGANCHE + abonos.reduce((s,a) => s + a.amount, 0);
+const totalPagado   = () => ENGANCHE + abonos.reduce((s, a) => s + a.amount, 0);
 const totalFalta    = () => Math.max(TOTAL - totalPagado(), 0);
 const semanasLeft   = () => Math.max(Math.ceil((DEADLINE - Date.now()) / 6048e5), 0);
 const ahorroSemanal = () => {
@@ -85,13 +77,13 @@ const ahorroSemanal = () => {
 
 // ─── FORMATO ─────────────────────────────────────────────
 function $$(n) {
-  return new Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN', maximumFractionDigits:0 }).format(n);
+  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n);
 }
 function fmtFecha(str) {
-  return new Date(str + 'T12:00:00').toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
+  return new Date(str + 'T12:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ─── IMAGEN: COMPRIMIR ───────────────────────────────────
@@ -116,7 +108,7 @@ function comprimirFoto(file, cb) {
 // ─── MODAL ───────────────────────────────────────────────
 let fotoBase64 = null;
 
-window.openModal = function() {
+window.openModal = function () {
   document.getElementById('inDate').value   = new Date().toISOString().split('T')[0];
   document.getElementById('inAmount').value = '';
   document.getElementById('inNote').value   = '';
@@ -130,7 +122,7 @@ window.openModal = function() {
   setTimeout(() => document.getElementById('inAmount').focus(), 360);
 };
 
-window.closeModal = function() {
+window.closeModal = function () {
   document.getElementById('overlay').classList.remove('open');
   const scrollY = parseInt(document.body.dataset.scrollY || '0');
   document.body.style.position = '';
@@ -139,9 +131,9 @@ window.closeModal = function() {
   window.scrollTo(0, scrollY);
 };
 
-window.outsideClick = function(e) { if (e.target.id === 'overlay') window.closeModal(); };
+window.outsideClick = function (e) { if (e.target.id === 'overlay') window.closeModal(); };
 
-window.onFotoChange = function(e) {
+window.onFotoChange = function (e) {
   const file = e.target.files[0];
   if (!file) return;
   comprimirFoto(file, b64 => {
@@ -154,7 +146,7 @@ window.onFotoChange = function(e) {
   });
 };
 
-window.clearFoto = function() {
+window.clearFoto = function () {
   fotoBase64 = null;
   document.getElementById('fotoPreview').classList.remove('show');
   document.getElementById('fotoPreview').src = '';
@@ -163,68 +155,71 @@ window.clearFoto = function() {
 };
 
 // ─── ACCIONES ────────────────────────────────────────────
-window.saveAbono = async function() {
+window.saveAbono = async function () {
   const amount = parseFloat(document.getElementById('inAmount').value);
   const date   = document.getElementById('inDate').value;
   const note   = document.getElementById('inNote').value.trim() || 'Abono';
   if (!amount || amount <= 0 || !date) { alert('Ingresa el monto y la fecha.'); return; }
 
   const btn = document.getElementById('btnGuardar');
-  btn.disabled = true;
+  btn.disabled    = true;
   btn.textContent = 'Guardando…';
   try {
-    await addDoc(getAbonosCol(), { date, amount, note, photo: fotoBase64 ?? null, createdAt: serverTimestamp() });
+    await dbAdd({ date, amount, note, photo: fotoBase64 ?? null });
+    abonos = await dbGetAll();
     window.closeModal();
+    render();
     confeti();
-  } catch(err) {
-    alert('Error al guardar. Revisa tu conexión a internet.');
+  } catch (err) {
+    alert('Error al guardar: ' + err.message);
   } finally {
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = 'Guardar abono';
   }
 };
 
-window.eliminarAbono = async function(id) {
+window.eliminarAbono = async function (id) {
   if (!confirm('¿Eliminar este abono?')) return;
   try {
-    await deleteDoc(doc(db, 'usuarios', auth.currentUser.uid, 'abonos', id));
-  } catch(err) {
-    alert('Error al eliminar. Revisa tu conexión.');
+    await dbDelete(id);
+    abonos = await dbGetAll();
+    render();
+  } catch (err) {
+    alert('Error al eliminar: ' + err.message);
   }
 };
 
-window.confirmReset = async function() {
+window.confirmReset = async function () {
   if (!confirm('¿Reiniciar todo el progreso? Esta acción no se puede deshacer.')) return;
   try {
-    const snap  = await getDocs(getAbonosCol());
-    const batch = writeBatch(db);
-    snap.docs.forEach(d => batch.delete(d.ref));
-    await batch.commit();
-  } catch(err) {
-    alert('Error al reiniciar. Revisa tu conexión.');
+    await dbClear();
+    abonos = [];
+    render();
+  } catch (err) {
+    alert('Error al reiniciar: ' + err.message);
   }
 };
 
 // ─── LIGHTBOX ────────────────────────────────────────────
-window.openLightbox = function(src) {
+window.openLightbox = function (src) {
   document.getElementById('lightboxImg').src = src;
   document.getElementById('lightbox').classList.add('open');
 };
-window.closeLightbox = function() { document.getElementById('lightbox').classList.remove('open'); };
+window.closeLightbox = function () { document.getElementById('lightbox').classList.remove('open'); };
 
 // ─── CONFETI ─────────────────────────────────────────────
 function confeti() {
-  const cols = ['#2ec4b6','#06d6a0','#ffd166','#ef476f','#3b82f6','#a78bfa'];
+  const cols = ['#2ec4b6', '#06d6a0', '#ffd166', '#ef476f', '#3b82f6', '#a78bfa'];
   for (let i = 0; i < 35; i++) {
     const el = document.createElement('div');
     el.className = 'conf';
     el.style.cssText = `
-      left:${Math.random()*100}vw; top:-12px;
+      left:${Math.random() * 100}vw; top:-12px;
       background:${cols[i % cols.length]};
-      animation-duration:${1.5 + Math.random()*1.2}s;
-      animation-delay:${Math.random()*0.5}s;
-      width:${6+Math.random()*6}px; height:${6+Math.random()*6}px;
-      border-radius:${Math.random()>0.5?'50%':'2px'};
+      animation-duration:${1.5 + Math.random() * 1.2}s;
+      animation-delay:${Math.random() * 0.5}s;
+      width:${6 + Math.random() * 6}px; height:${6 + Math.random() * 6}px;
+      border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
     `;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3500);
@@ -250,9 +245,9 @@ function render() {
   document.getElementById('weeklyNote').textContent = sem > 0
     ? `por semana · ${sem} semanas para el vencimiento`
     : (falta > 0 ? 'La fecha límite ya venció' : '¡Meta alcanzada!');
-  document.getElementById('wgWeeks').textContent    = sem;
-  document.getElementById('wgPagado').textContent   = $$(paid);
-  document.getElementById('wgFalta').textContent    = $$(falta);
+  document.getElementById('wgWeeks').textContent  = sem;
+  document.getElementById('wgPagado').textContent = $$(paid);
+  document.getElementById('wgFalta').textContent  = $$(falta);
 
   const cont = document.getElementById('abonosContainer');
   const ul   = document.createElement('ul');
@@ -269,7 +264,7 @@ function render() {
       li.className = 'abono-item';
 
       const fotoHtml = a.photo
-        ? `<img class="abono-thumb" src="${a.photo}" alt="Comprobante" onclick="openLightbox('${a.photo.replace(/'/g,"\\'")}') ">`
+        ? `<img class="abono-thumb" src="${a.photo}" alt="Comprobante" onclick="openLightbox('${a.photo.replace(/'/g, "\\'")}') ">`
         : `<div class="abono-no-photo">🧾</div>`;
 
       li.innerHTML = `
@@ -308,7 +303,9 @@ function render() {
   if (paid >= TOTAL) document.getElementById('completion').classList.add('show');
 }
 
-// ─── SERVICE WORKER ──────────────────────────────────────
+// ─── INIT ─────────────────────────────────────────────────
+cargarAbonos();
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
