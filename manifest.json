@@ -1,0 +1,15 @@
+{
+  "name": "Mi Lote — Camino Oriente I",
+  "short_name": "Mi Lote",
+  "description": "Seguimiento de pagos de terreno",
+  "start_url": "/terreno/",
+  "scope": "/terreno/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1f5f9",
+  "theme_color": "#1a535c",
+  "icons": [
+    { "src": "terreno.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "terreno.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

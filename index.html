@@ -9,6 +9,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Mi Lote">
   <meta name="theme-color" content="#1a535c">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -342,6 +344,48 @@
       .weekly-grid { grid-template-columns:repeat(4,1fr); }
       .stats-row   { grid-template-columns:repeat(3,1fr); }
     }
+
+    /* ── USER BAR ── */
+    .user-bar {
+      display:flex; align-items:center; gap:10px;
+      margin-top:18px; padding:10px 14px;
+      background:rgba(255,255,255,0.1); border-radius:12px;
+    }
+    .user-avatar {
+      width:32px; height:32px; border-radius:50%;
+      object-fit:cover; border:2px solid rgba(255,255,255,0.4);
+    }
+    .user-name { font-size:0.82rem; opacity:0.85; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .btn-logout {
+      background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3);
+      color:white; padding:5px 12px; border-radius:8px;
+      font-size:0.75rem; font-weight:600; cursor:pointer;
+      touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+      flex-shrink:0;
+    }
+    .btn-logout:hover { background:rgba(255,255,255,0.25); }
+
+    /* ── LOGIN SCREEN ── */
+    .login-screen {
+      position:fixed; inset:0; z-index:500;
+      background:linear-gradient(140deg, #0d3b47 0%, #1a535c 50%, #2c7873 100%);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:32px 24px;
+    }
+    .login-logo { width:80px; height:80px; border-radius:20px; margin-bottom:24px; }
+    .login-title { font-size:1.6rem; font-weight:800; color:white; margin-bottom:6px; letter-spacing:-0.02em; }
+    .login-sub   { font-size:0.88rem; color:rgba(255,255,255,0.6); margin-bottom:40px; text-align:center; }
+    .btn-google  {
+      display:flex; align-items:center; gap:12px;
+      background:white; color:#1e293b;
+      padding:14px 24px; border-radius:14px; border:none;
+      font-family:inherit; font-size:1rem; font-weight:600;
+      cursor:pointer; width:100%; max-width:320px; justify-content:center;
+      box-shadow:0 4px 20px rgba(0,0,0,0.2);
+      touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+    }
+    .btn-google:active { transform:scale(0.97); }
+    .btn-google svg { width:22px; height:22px; flex-shrink:0; }
   </style>
 </head>
 <body>
@@ -355,6 +399,11 @@
     <div class="header-value">
       <span class="header-value-label">Valor total del lote</span>
       <span class="header-value-amount">$215,000</span>
+    </div>
+    <div class="user-bar">
+      <img class="user-avatar" id="userAvatar" src="" alt="">
+      <span class="user-name" id="userName"></span>
+      <button class="btn-logout" onclick="logout()">Salir</button>
     </div>
   </div>
 </header>
@@ -498,6 +547,22 @@
   <img id="lightboxImg" src="" alt="Comprobante">
 </div>
 
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <img class="login-logo" src="terreno.png" alt="Mi Lote">
+  <div class="login-title">Mi Lote</div>
+  <div class="login-sub">Camino Oriente I · Seguimiento de pagos<br>Inicia sesión para ver tus datos</div>
+  <button class="btn-google" onclick="loginGoogle()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    Continuar con Google
+  </button>
+</div>
+
 <!-- COMPLETION -->
 <div class="completion" id="completion">
   <div class="completion-box">
@@ -509,10 +574,12 @@
 </div>
 
 <script type="module">
-  import { initializeApp }    from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { initializeApp }       from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
   import { getFirestore, collection, addDoc, deleteDoc, doc,
            onSnapshot, query, orderBy, writeBatch, getDocs,
-           serverTimestamp }  from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+           serverTimestamp }     from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup,
+           signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
   // ─── FIREBASE ────────────────────────────────────────────
   const firebaseConfig = {
@@ -523,9 +590,9 @@
     messagingSenderId: "127285522519",
     appId:             "1:127285522519:web:fbb5af77d57d96f0037312"
   };
-  const fireApp    = initializeApp(firebaseConfig);
-  const db         = getFirestore(fireApp);
-  const abonosCol  = collection(db, 'abonos');
+  const fireApp = initializeApp(firebaseConfig);
+  const db      = getFirestore(fireApp);
+  const auth    = getAuth(fireApp);
 
   // ─── CONSTANTES ──────────────────────────────────────────
   const TOTAL    = 215000;
@@ -533,14 +600,49 @@
   const DEADLINE = new Date(2027, 9, 31);
 
   // ─── ESTADO ──────────────────────────────────────────────
-  let abonos = [];
+  let abonos      = [];
+  let unsubscribe = null;
 
-  // ─── ESCUCHAR FIRESTORE (tiempo real) ────────────────────
-  const q = query(abonosCol, orderBy('createdAt', 'desc'));
-  onSnapshot(q, snapshot => {
-    abonos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-    render();
+  // ─── AUTH ────────────────────────────────────────────────
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('userName').textContent = user.displayName || user.email;
+      const av = document.getElementById('userAvatar');
+      if (user.photoURL) { av.src = user.photoURL; av.style.display = 'block'; }
+      else { av.style.display = 'none'; }
+
+      // Datos propios del usuario
+      const abonosCol = collection(db, 'usuarios', user.uid, 'abonos');
+      const q = query(abonosCol, orderBy('createdAt', 'desc'));
+      unsubscribe = onSnapshot(q, snapshot => {
+        abonos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        render();
+      });
+    } else {
+      document.getElementById('loginScreen').style.display = 'flex';
+      if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+      abonos = [];
+      render();
+    }
   });
+
+  function getAbonosCol() {
+    return collection(db, 'usuarios', auth.currentUser.uid, 'abonos');
+  }
+
+  window.loginGoogle = async function() {
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+    } catch(err) {
+      if (err.code !== 'auth/popup-closed-by-user') alert('Error al iniciar sesión. Intenta de nuevo.');
+    }
+  };
+
+  window.logout = async function() {
+    if (!confirm('¿Cerrar sesión?')) return;
+    await signOut(auth);
+  };
 
   // ─── CÁLCULOS ────────────────────────────────────────────
   const totalPagado   = () => ENGANCHE + abonos.reduce((s,a) => s + a.amount, 0);
@@ -641,7 +743,7 @@
     btn.disabled = true;
     btn.textContent = 'Guardando…';
     try {
-      await addDoc(abonosCol, { date, amount, note, photo: fotoBase64 ?? null, createdAt: serverTimestamp() });
+      await addDoc(getAbonosCol(), { date, amount, note, photo: fotoBase64 ?? null, createdAt: serverTimestamp() });
       window.closeModal();
       confeti();
     } catch(err) {
@@ -655,7 +757,7 @@
   window.eliminarAbono = async function(id) {
     if (!confirm('¿Eliminar este abono?')) return;
     try {
-      await deleteDoc(doc(db, 'abonos', id));
+      await deleteDoc(doc(db, 'usuarios', auth.currentUser.uid, 'abonos', id));
     } catch(err) {
       alert('Error al eliminar. Revisa tu conexión.');
     }
@@ -664,7 +766,7 @@
   window.confirmReset = async function() {
     if (!confirm('¿Reiniciar todo el progreso? Esta acción no se puede deshacer.')) return;
     try {
-      const snap  = await getDocs(abonosCol);
+      const snap  = await getDocs(getAbonosCol());
       const batch = writeBatch(db);
       snap.docs.forEach(d => batch.delete(d.ref));
       await batch.commit();
@@ -776,8 +878,10 @@
     if (paid >= TOTAL) document.getElementById('completion').classList.add('show');
   }
 
-  // Render inicial mientras Firestore conecta
-  render();
+  // ─── SERVICE WORKER ──────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
 </script>
 </body>
 </html>
