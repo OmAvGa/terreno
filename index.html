@@ -578,8 +578,9 @@
   import { getFirestore, collection, addDoc, deleteDoc, doc,
            onSnapshot, query, orderBy, writeBatch, getDocs,
            serverTimestamp }     from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup,
-           signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  import { getAuth, GoogleAuthProvider, signInWithRedirect,
+           getRedirectResult, signOut,
+           onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
   // ─── FIREBASE ────────────────────────────────────────────
   const firebaseConfig = {
@@ -631,11 +632,16 @@
     return collection(db, 'usuarios', auth.currentUser.uid, 'abonos');
   }
 
+  // Captura el resultado al volver del redirect de Google
+  getRedirectResult(auth).catch(err => {
+    alert('Error de login: ' + err.code + '\n' + err.message);
+  });
+
   window.loginGoogle = async function() {
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      await signInWithRedirect(auth, new GoogleAuthProvider());
     } catch(err) {
-      if (err.code !== 'auth/popup-closed-by-user') alert('Error al iniciar sesión. Intenta de nuevo.');
+      alert('Error: ' + err.code);
     }
   };
 
