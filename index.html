@@ -120,11 +120,11 @@
 <div class="overlay" id="overlay" onclick="outsideClick(event)">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Agregar abono</div>
+    <div class="modal-title" id="modalTitle">Agregar abono</div>
 
     <div class="field">
       <label class="field-label" for="inAmount">Monto del abono (MXN)</label>
-      <input class="field-input" type="number" id="inAmount" placeholder="Ej: 5,000" min="1" step="100">
+      <input class="field-input" type="number" id="inAmount" placeholder="Ej: 5,000" min="1" step="100" inputmode="decimal" pattern="[0-9]*">
     </div>
 
     <div class="field-row">

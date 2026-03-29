@@ -35,6 +35,21 @@ async function dbAdd(data) {
   });
 }
 
+async function dbUpdate(id, data) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const store = db.transaction(STORE, 'readwrite').objectStore(STORE);
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      const existing = getReq.result;
+      const putReq = store.put({ ...existing, ...data });
+      putReq.onsuccess = () => resolve();
+      putReq.onerror   = e => reject(e.target.error);
+    };
+    getReq.onerror = e => reject(e.target.error);
+  });
+}
+
 async function dbDelete(id) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -106,13 +121,10 @@ function comprimirFoto(file, cb) {
 }
 
 // ─── MODAL ───────────────────────────────────────────────
-let fotoBase64 = null;
+let fotoBase64  = null;
+let editingId   = null;
 
-window.openModal = function () {
-  document.getElementById('inDate').value   = new Date().toISOString().split('T')[0];
-  document.getElementById('inAmount').value = '';
-  document.getElementById('inNote').value   = '';
-  window.clearFoto();
+function openOverlay() {
   document.getElementById('overlay').classList.add('open');
   const scrollY = window.scrollY;
   document.body.style.position  = 'fixed';
@@ -120,6 +132,39 @@ window.openModal = function () {
   document.body.style.width     = '100%';
   document.body.dataset.scrollY = scrollY;
   setTimeout(() => document.getElementById('inAmount').focus(), 360);
+}
+
+window.openModal = function () {
+  editingId = null;
+  document.getElementById('modalTitle').textContent  = 'Agregar abono';
+  document.getElementById('btnGuardar').textContent  = 'Guardar abono';
+  document.getElementById('inDate').value   = new Date().toISOString().split('T')[0];
+  document.getElementById('inAmount').value = '';
+  document.getElementById('inNote').value   = '';
+  window.clearFoto();
+  openOverlay();
+};
+
+window.openEditModal = function (id) {
+  const a = abonos.find(x => x.id === id);
+  if (!a) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent  = 'Editar abono';
+  document.getElementById('btnGuardar').textContent  = 'Guardar cambios';
+  document.getElementById('inDate').value   = a.date;
+  document.getElementById('inAmount').value = a.amount;
+  document.getElementById('inNote').value   = a.note !== 'Abono' ? a.note : '';
+  if (a.photo) {
+    fotoBase64 = a.photo;
+    const prev = document.getElementById('fotoPreview');
+    prev.src = a.photo;
+    prev.classList.add('show');
+    document.getElementById('fotoClear').classList.add('show');
+    document.getElementById('fotoZone').style.display = 'none';
+  } else {
+    window.clearFoto();
+  }
+  openOverlay();
 };
 
 window.closeModal = function () {
@@ -165,16 +210,21 @@ window.saveAbono = async function () {
   btn.disabled    = true;
   btn.textContent = 'Guardando…';
   try {
-    await dbAdd({ date, amount, note, photo: fotoBase64 ?? null });
+    if (editingId !== null) {
+      await dbUpdate(editingId, { date, amount, note, photo: fotoBase64 ?? null });
+    } else {
+      await dbAdd({ date, amount, note, photo: fotoBase64 ?? null });
+    }
     abonos = await dbGetAll();
     window.closeModal();
     render();
-    confeti();
+    if (editingId === null) confeti();
+    editingId = null;
   } catch (err) {
     alert('Error al guardar: ' + err.message);
   } finally {
     btn.disabled    = false;
-    btn.textContent = 'Guardar abono';
+    btn.textContent = editingId !== null ? 'Guardar cambios' : 'Guardar abono';
   }
 };
 
@@ -275,9 +325,11 @@ function render() {
         </div>
         <div class="abono-right">
           <div class="abono-amt">+${$$(a.amount)}</div>
+          <button class="abono-edit" title="Editar">✏</button>
           <button class="abono-del" title="Eliminar">✕</button>
         </div>`;
 
+      li.querySelector('.abono-edit').onclick = () => window.openEditModal(a.id);
       li.querySelector('.abono-del').onclick = () => window.eliminarAbono(a.id);
       ul.appendChild(li);
     });
