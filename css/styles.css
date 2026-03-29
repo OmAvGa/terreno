@@ -63,7 +63,7 @@ body {
 .header-value-amount { font-size:2rem; font-weight:800; letter-spacing:-0.02em; }
 
 /* ── MAIN ── */
-.main { max-width:860px; margin:-32px auto 0; padding:0 16px 48px; }
+.main { max-width:860px; margin:-16px auto 0; padding:0 16px 48px; }
 
 /* ── CARD ── */
 .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px; margin-bottom:16px; }
@@ -75,7 +75,7 @@ body {
   box-shadow:var(--shadow-lg);
   padding:40px 28px 24px; margin-bottom:16px;
 }
-.prog-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+.prog-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
 .prog-left { flex:1; }
 .prog-pct { font-size:4.5rem; font-weight:800; color:var(--primary-dark); line-height:1; letter-spacing:-0.04em; }
 .prog-sub { font-size:0.85rem; color:var(--muted); margin-top:6px; }
