@@ -84,7 +84,13 @@ async function cargarAbonos() {
 // ─── CÁLCULOS ────────────────────────────────────────────
 const totalPagado   = () => ENGANCHE + abonos.reduce((s, a) => s + a.amount, 0);
 const totalFalta    = () => Math.max(TOTAL - totalPagado(), 0);
-const semanasLeft   = () => Math.max(Math.ceil((DEADLINE - Date.now()) / 6048e5), 0);
+const semanasLeft   = () => {
+  const hoy   = new Date();
+  const dia   = hoy.getDay(); // 0=dom, 1=lun … 6=sab
+  const lunesOffset = (dia === 0 ? -6 : 1 - dia); // días para retroceder al lunes
+  const lunes = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + lunesOffset);
+  return Math.max(Math.ceil((DEADLINE - lunes.getTime()) / 6048e5), 0);
+};
 const ahorroSemanal = () => {
   const s = semanasLeft(), r = totalFalta();
   return (r <= 0) ? 0 : (s <= 0 ? r : Math.ceil(r / s));
