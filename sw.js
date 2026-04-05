@@ -1,4 +1,4 @@
-const CACHE = 'milote-v2';
+const CACHE = 'milote-v3';
 const ASSETS = [
   '/terreno/',
   '/terreno/index.html',
@@ -25,9 +25,16 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Solo cachear recursos del mismo origen
   if (!e.request.url.startsWith(self.location.origin)) return;
+  // Network-first: carga desde la red y actualiza el caché,
+  // solo usa el caché si no hay conexión (modo offline).
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(e.request)
+      .then(response => {
+        const clone = response.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
