@@ -380,6 +380,84 @@ function render() {
   if (paid >= TOTAL) document.getElementById('completion').classList.add('show');
 }
 
+// ─── PWA INSTALL ──────────────────────────────────────────
+(function () {
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+  }
+  function isIOS() {
+    return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  }
+  function isSafariBrowser() {
+    return /safari/i.test(navigator.userAgent) && !/chrome|crios|fxios/i.test(navigator.userAgent);
+  }
+
+  if (isStandalone()) return; // ya instalada, no mostrar nada
+
+  const banner    = document.getElementById('installBanner');
+  const installBtn = document.getElementById('installBtn');
+  const closeBtn  = document.getElementById('installClose');
+  const iosSheet  = document.getElementById('iosSheet');
+  const iosOkBtn  = document.getElementById('iosSheetOk');
+
+  let deferredPrompt = null;
+
+  function showBanner(type) {
+    banner.dataset.type = type;
+    if (type === 'ios') {
+      document.getElementById('installBannerSub').textContent = 'Sigue 3 pasos rápidos en Safari';
+      installBtn.textContent = 'Ver cómo';
+    }
+    setTimeout(() => banner.classList.add('show'), 1000);
+  }
+
+  // Android / Chrome: capturar el evento nativo
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    showBanner('android');
+  });
+
+  // iOS + Safari: mostrar instrucciones manuales
+  window.addEventListener('load', () => {
+    if (isIOS() && isSafariBrowser() && !isStandalone()) {
+      showBanner('ios');
+    }
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (banner.dataset.type === 'ios') {
+      iosSheet.classList.add('show');
+      return;
+    }
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (outcome === 'accepted') banner.classList.remove('show');
+  });
+
+  closeBtn.addEventListener('click', () => {
+    banner.classList.remove('show');
+  });
+
+  iosOkBtn.addEventListener('click', () => {
+    iosSheet.classList.remove('show');
+    banner.classList.remove('show');
+  });
+
+  iosSheet.addEventListener('click', e => {
+    if (e.target === iosSheet) iosSheet.classList.remove('show');
+  });
+
+  // Ocultar banner si se instala desde otro flujo
+  window.addEventListener('appinstalled', () => {
+    banner.classList.remove('show');
+    deferredPrompt = null;
+  });
+})();
+
 // ─── PERIOD TOGGLE ────────────────────────────────────────
 document.querySelectorAll('.period-btn').forEach(btn => {
   btn.addEventListener('click', () => {
