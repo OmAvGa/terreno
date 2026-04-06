@@ -75,6 +75,7 @@ const DEADLINE = new Date(2027, 9, 31);
 
 // ─── ESTADO ──────────────────────────────────────────────
 let abonos = [];
+let periodoActual = 'semana';
 
 async function cargarAbonos() {
   abonos = await dbGetAll();
@@ -86,15 +87,24 @@ const totalPagado   = () => ENGANCHE + abonos.reduce((s, a) => s + a.amount, 0);
 const totalFalta    = () => Math.max(TOTAL - totalPagado(), 0);
 const semanasLeft   = () => {
   const hoy   = new Date();
-  const dia   = hoy.getDay(); // 0=dom, 1=lun … 6=sab
-  const lunesOffset = (dia === 0 ? -6 : 1 - dia); // días para retroceder al lunes
+  const dia   = hoy.getDay();
+  const lunesOffset = (dia === 0 ? -6 : 1 - dia);
   const lunes = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + lunesOffset);
   return Math.max(Math.ceil((DEADLINE - lunes.getTime()) / 6048e5), 0);
 };
-const ahorroSemanal = () => {
-  const s = semanasLeft(), r = totalFalta();
-  return (r <= 0) ? 0 : (s <= 0 ? r : Math.ceil(r / s));
+const quincenasLeft = () => {
+  const hoy  = new Date();
+  const dias = (DEADLINE - hoy) / 864e5;
+  return Math.max(Math.ceil(dias / 14), 0);
 };
+const mesesLeft = () => {
+  const hoy   = new Date();
+  const meses = (DEADLINE.getFullYear() - hoy.getFullYear()) * 12 + (DEADLINE.getMonth() - hoy.getMonth());
+  return Math.max(meses, 0);
+};
+const ahorroSemanal    = () => { const s = semanasLeft(),    r = totalFalta(); return (r <= 0) ? 0 : (s <= 0 ? r : Math.ceil(r / s)); };
+const ahorroQuincenal  = () => { const q = quincenasLeft(),  r = totalFalta(); return (r <= 0) ? 0 : (q <= 0 ? r : Math.ceil(r / q)); };
+const ahorroMensual    = () => { const m = mesesLeft(),      r = totalFalta(); return (r <= 0) ? 0 : (m <= 0 ? r : Math.ceil(r / m)); };
 
 // ─── FORMATO ─────────────────────────────────────────────
 function $$(n) {
@@ -284,11 +294,9 @@ function confeti() {
 
 // ─── RENDER ──────────────────────────────────────────────
 function render() {
-  const paid    = totalPagado();
-  const falta   = totalFalta();
-  const pct     = Math.min((paid / TOTAL) * 100, 100);
-  const sem     = semanasLeft();
-  const semanal = ahorroSemanal();
+  const paid  = totalPagado();
+  const falta = totalFalta();
+  const pct   = Math.min((paid / TOTAL) * 100, 100);
 
   document.getElementById('pct').textContent        = pct.toFixed(1) + '%';
   document.getElementById('paidVal').textContent    = $$(paid);
@@ -297,13 +305,24 @@ function render() {
   document.getElementById('statPaid').textContent   = $$(paid);
   document.getElementById('statRem').textContent    = $$(falta);
 
-  document.getElementById('weeklyAmt').textContent  = $$(semanal);
-  document.getElementById('weeklyNote').textContent = sem > 0
-    ? `por semana · ${sem} semanas para el vencimiento`
+  // ─ Calcular según periodo activo ─
+  const periodos = {
+    semana:    { fn: ahorroSemanal,   left: semanasLeft,   label: 'semana',    lbl: 'Semanas restantes'    },
+    quincena:  { fn: ahorroQuincenal, left: quincenasLeft, label: 'quincena',  lbl: 'Quincenas restantes'  },
+    mes:       { fn: ahorroMensual,   left: mesesLeft,     label: 'mes',       lbl: 'Meses restantes'      },
+  };
+  const p      = periodos[periodoActual];
+  const left   = p.left();
+  const ahorro = p.fn();
+
+  document.getElementById('weeklyAmt').textContent  = $$(ahorro);
+  document.getElementById('weeklyNote').textContent = left > 0
+    ? `por ${p.label} · ${left} ${p.lbl.toLowerCase()} al vencimiento`
     : (falta > 0 ? 'La fecha límite ya venció' : '¡Meta alcanzada!');
-  document.getElementById('wgWeeks').textContent  = sem;
-  document.getElementById('wgPagado').textContent = $$(paid);
-  document.getElementById('wgFalta').textContent  = $$(falta);
+  document.getElementById('wgWeeks').textContent    = left;
+  document.getElementById('wgWeeksLbl').textContent = p.lbl;
+  document.getElementById('wgPagado').textContent   = $$(paid);
+  document.getElementById('wgFalta').textContent    = $$(falta);
 
   const cont = document.getElementById('abonosContainer');
   const ul   = document.createElement('ul');
@@ -360,6 +379,16 @@ function render() {
 
   if (paid >= TOTAL) document.getElementById('completion').classList.add('show');
 }
+
+// ─── PERIOD TOGGLE ────────────────────────────────────────
+document.querySelectorAll('.period-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    periodoActual = btn.dataset.period;
+    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+});
 
 // ─── INIT ─────────────────────────────────────────────────
 cargarAbonos();

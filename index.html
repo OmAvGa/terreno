@@ -65,12 +65,17 @@
   <!-- CALCULADORA SEMANAL -->
   <div class="weekly-box">
     <div class="weekly-label">Para llegar a $215,000, ahorra</div>
+    <div class="period-toggle">
+      <button class="period-btn active" data-period="semana">Semana</button>
+      <button class="period-btn" data-period="quincena">Quincena</button>
+      <button class="period-btn" data-period="mes">Mes</button>
+    </div>
     <div class="weekly-amount" id="weeklyAmt">$0</div>
     <div class="weekly-note" id="weeklyNote">por semana</div>
     <div class="weekly-grid">
       <div class="wg-item">
         <div class="wg-val" id="wgWeeks">—</div>
-        <div class="wg-lbl">Semanas restantes</div>
+        <div class="wg-lbl" id="wgWeeksLbl">Semanas restantes</div>
       </div>
       <div class="wg-item">
         <div class="wg-val">Oct 2027</div>
